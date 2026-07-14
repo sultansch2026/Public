@@ -1,721 +1,125 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة الأمير سلطان التعليمية - نظام المحاكاة الوطني الرسمي 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+import streamlit as st
+import random
+from PIL import Image, ImageDraw, ImageFont
+import io
+
+# 1. مكتبة الأسئلة الكبيرة (مقسمة حسب المجالات)
+# يمكنك توسيع هذه المكتبة بإضافة مئات الأسئلة بنفس النمط
+QUESTIONS_BANK = {
+    "علم البيانات والذكاء الاصطناعي": [
+        {"question": "ما هي المكتبة الأساسية لتلاعب بالبيانات في بايثون؟", "options": ["Pandas", "NumPy", "Scikit-Learn", "Matplotlib"], "answer": "Pandas"},
+        {"question": "أي من الخوارزميات التالية يعتبر من خوارزميات التعلم الخاضع للإشراف (Supervised)؟", "options": ["K-Means", "Linear Regression", "PCA", "DBSCAN"], "answer": "Linear Regression"},
+        {"question": "ما هو الهدف الرئيسي من عملية الـ Overfitting في النماذج؟", "options": ["حفظ البيانات بدقة عالية وفشل التعميم", "تحسين الأداء على بيانات جديدة", "تقليل وقت التدريب", "تنظيف البيانات"], "answer": "حفظ البيانات بدقة عالية وفشل التعميم"},
+        {"question": "ما الدالة المستخدمة لتحويل البيانات النصية إلى متجهات رقمية؟", "options": ["TF-IDF", "Dropna", "Groupby", "Describe"], "answer": "TF-IDF"},
+        {"question": "أي مكتبة تستخدم بشكل واسع لبناء الشبكات العصبية العميقة؟", "options": ["TensorFlow", "OpenCV", "Requests", "BeautifulSoup"], "answer": "TensorFlow"}
+    ],
+    "تحليل البيانات وإكسل": [
+        {"question": "أي دالة في إكسل تستخدم للبحث العمودي عن القيم؟", "options": ["VLOOKUP", "HLOOKUP", "INDEX", "MATCH"], "answer": "VLOOKUP"},
+        {"question": "ما هي الأداة الأفضل في إكسل لتلخيص وتحليل الجداول الضخمة بنقرات بسيطة؟", "options": ["Pivot Tables", "Conditional Formatting", "Data Validation", "What-If Analysis"], "answer": "Pivot Tables"},
+        {"question": "ماذا تعني الصيغة $A$1 في إكسل؟", "options": ["مرجع مطلق للخلية", "مرجع نسبي للخلية", "خطأ في الصيغة", "اسم نطاق"], "answer": "مرجع مطلق للخلية"},
+        {"question": "أي دالة تستخدم لحساب عدد الخلايا التي تحتوي على أرقام فقط؟", "options": ["COUNT", "COUNTA", "COUNTBLANK", "COUNTIF"], "answer": "COUNT"},
+        {"question": "لتطبيق تنسيق تلقائي بناءً على شرط معين، نستخدم:", "options": ["التنسيق الشرطي", "الفرز والتصفية", "التحقق من صحة البيانات", "دمج المراسلات"], "answer": "التنسيق الشرطي"}
+    ]
+}
+
+# 2. دالة توليد شهادة الإنجاز تلقائياً كصورة
+def generate_certificate(name, domain):
+    # إنشاء صورة بيضاء كخلفية للشهادة (أبعاد الشاشة القياسية للشهادات)
+    img = Image.new('RGB', (800, 600), color='#F4F6F9')
+    draw = ImageDraw.Draw(img)
     
-    <style>
-        :root {
-            --primary-dark: #06405c;
-            --primary-blue: #1d5cb4;
-            --teal-green: #0a7e74;
-            --light-teal: #e8f6f5;
-            --light-blue: #edf4fc;
-            --light-bg: #f4f8fb;
-            --text-color: #333333;
-            --text-muted: #666666;
-            --pure-white: #ffffff;
-            --purple-accent: #5034a4;
-            --danger-color: #e53e3e;
-            --success-color: #28a745; 
-            --light-success: #e8f5e9; 
-            --card-shadow: 0 10px 30px rgba(6, 64, 92, 0.05);
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+    # رسم إطار جمالي
+    draw.rectangle([(20, 20), (780, 580)], outline="#1E3A8A", width=10)
+    draw.rectangle([(30, 30), (770, 570)], outline="#D97706", width=3)
 
-        body.dark-mode {
-            --light-bg: #0f172a;
-            --pure-white: #1e293b;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary-dark: #38bdf8;
-            --light-blue: #1e293b;
-            --light-teal: #0f172a;
-        }
+    # كتابة النصوص (ملاحظة: لدعم العربية بشكل كامل في الأنظمة المحلية قد تحتاج لتمرير خط يدعم العربية مثل Arial)
+    try:
+        font_title = ImageFont.truetype("arial.ttf", 40)
+        font_body = ImageFont.truetype("arial.ttf", 24)
+        font_sub = ImageFont.truetype("arial.ttf", 18)
+    except IOError:
+        font_title = ImageFont.load_default()
+        font_body = ImageFont.load_default()
+        font_sub = ImageFont.load_default()
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-        body { background-color: var(--light-bg); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; transition: var(--transition); }
+    # نصوص الشهادة (تم عكس النص أو تنسيقه ليظهر بشكل مناسب حسب المكتبة المستخدمة)
+    draw.text((400, 100), "شـهـادة إنـجـاز", fill="#1E3A8A", font=font_title, anchor="mm")
+    draw.text((400, 200), "يتقدم نظام الاختبارات الذكي بتهنئة", fill="#333333", font=font_body, anchor="mm")
+    draw.text((400, 270), f"المتدرب/ة: {name}", fill="#D97706", font=font_title, anchor="mm")
+    draw.text((400, 350), f"لاجتيازه بنجاح الاختبار التقييمي في مجال:", fill="#333333", font=font_body, anchor="mm")
+    draw.text((400, 410), f"[{domain}]", fill="#1E3A8A", font=font_body, anchor="mm")
+    draw.text((400, 500), "تهانينا لك هذا التميز المتواصل!", fill="#059669", font=font_sub, anchor="mm")
 
-        header { background-color: var(--pure-white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.03); position: sticky; top: 0; z-index: 1000; }
-        .logo-text h1 { color: var(--primary-dark); font-size: 19px; font-weight: 800; }
-        .logo-text p { color: var(--teal-green); font-size: 12px; font-weight: 500; }
+    # حفظ الصورة في الذاكرة لإتاحة تحميلها
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format='PNG')
+    return img_byte_arr.getvalue()
+
+# 3. واجهة المستخدم (Streamlit App)
+st.set_page_config(page_title="نظام الاختبارات الذكي", page_icon="🎓", layout="centered")
+st.title("🎓 نظام الاختبارات التفاعلي والمكتبة الذكية")
+st.write("اختبر مهاراتك؛ تتغير الأسئلة تلقائياً عند كل دخول لتحصل على تجربة جديدة دائماً!")
+
+# إدخال بيانات المستخدم
+user_name = st.text_input("الرجاء إدخال اسمك الثلاثي لإصدار الشهادة:", value="")
+domain_selected = st.selectbox("اختر مجال الاختبار:", list(QUESTIONS_BANK.keys()))
+
+# إعادة تعيين الأسئلة عند تغيير المجال أو الضغط على زر إعادة التعيين
+if "current_domain" not in st.session_state or st.session_state.current_domain != domain_selected:
+    st.session_state.current_domain = domain_selected
+    # اختيار 3 أسئلة عشوائية من المكتبة الكبيرة عند كل دخول/تغيير
+    st.session_state.selected_questions = random.sample(QUESTIONS_BANK[domain_selected], k=min(3, len(QUESTIONS_BANK[domain_selected])))
+    st.session_state.quiz_submitted = False
+
+# عرض الاختبار
+if user_name:
+    st.subheader(f"📋 اختبار مجال: {domain_selected}")
+    
+    user_answers = {}
+    for i, q in enumerate(st.session_state.selected_questions):
+        st.markdown(f"**س{i+1}: {q['question']}**")
+        # خلط الخيارات لضمان العشوائية الكاملة في كل مرة
+        options = q['options']
+        user_answers[i] = st.radio(f"اختر الإجابة الصحيحة لـ س{i+1}:", options, key=f"q_{i}")
+        st.write("---")
+
+    # زر إرسال الإجابات
+    if st.button("إرسال الإجابات وإنهاء الاختبار"):
+        score = 0
+        for i, q in enumerate(st.session_state.selected_questions):
+            if user_answers[i] == q['answer']:
+                score += 1
         
-        nav { display: flex; gap: 25px; align-items: center; }
-        nav a { text-decoration: none; color: var(--text-color); font-weight: 600; font-size: 14px; cursor: pointer; padding: 6px 0; }
-        nav a.active, nav a:hover { color: var(--teal-green); border-bottom: 3px solid var(--teal-green); }
+        total_q = len(st.session_state.selected_questions)
+        success_percentage = (score / total_q) * 100
         
-        .page-content { display: none; flex: 1; padding: 40px 5%; max-width: 1400px; margin: 0 auto; width: 100%; animation: fadeIn 0.3s ease; }
-        .page-content.active-page { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        st.session_state.quiz_submitted = True
+        st.session_state.score = score
+        st.session_state.percentage = success_percentage
 
-        .btn-action { background-color: var(--teal-green); color: white; padding: 12px 28px; border-radius: 25px; border: none; font-weight: 700; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(10, 126, 116, 0.15); }
-        .btn-action:hover { opacity: 0.95; transform: translateY(-2px); }
-        .btn-secondary { background-color: var(--primary-blue); }
-        .btn-purple { background-color: var(--purple-accent); }
-
-        .auth-container { background: var(--pure-white); padding: 40px 30px; border-radius: 20px; box-shadow: var(--card-shadow); max-width: 480px; margin: 60px auto; text-align: center; }
-        .form-group { margin-bottom: 22px; text-align: right; display: flex; flex-direction: column; gap: 8px; }
-        .form-group input, .form-group select { padding: 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.08); background: var(--light-bg); color: var(--text-color); font-size: 15px; outline: none; }
-
-        .quiz-layout { display: grid; grid-template-columns: 1fr 340px; gap: 30px; margin-top: 25px; }
-        @media (max-width: 992px) { .quiz-layout { grid-template-columns: 1fr; } }
+    # عرض النتيجة والشهادة
+    if st.session_state.get('quiz_submitted', False):
+        st.metric(label="درجتك النهائية", value=f"{st.session_state.score} من {len(st.session_state.selected_questions)}")
         
-        .quiz-card { background: var(--pure-white); padding: 35px; border-radius: 20px; box-shadow: var(--card-shadow); }
-        
-        .option-box { background: rgba(0,0,0,0.01); border: 1px solid rgba(0,0,0,0.06); padding: 16px; border-radius: 12px; cursor: pointer; margin-top: 14px; transition: var(--transition); display: flex; align-items: center; gap: 12px; font-size: 15px; }
-        .option-box:hover { background: rgba(40, 167, 69, 0.03); border-color: var(--success-color); }
-        .option-box.selected { background: var(--light-success); border-color: var(--success-color); font-weight: 700; color: var(--success-color); }
-        
-        .options-container.locked .option-box { pointer-events: none; cursor: not-allowed; opacity: 0.8; }
-        .options-container.locked .option-box:hover { background: rgba(0,0,0,0.01); border-color: rgba(0,0,0,0.06); }
-        .options-container.locked .option-box.selected { background: var(--light-success); border-color: var(--success-color); opacity: 1; }
-
-        .instant-feedback { margin-top: 20px; padding: 15px; border-radius: 10px; border-right: 5px solid; font-size: 14px; line-height: 1.6; animation: fadeIn 0.25s ease; }
-        .instant-feedback.correct { background: #e8f5e9; border-right-color: #28a745; color: #1b5e20; }
-        .instant-feedback.wrong { background: #ffebee; border-right-color: #c62828; color: #b71c1c; }
-
-        .questions-map { background: var(--pure-white); padding: 25px; border-radius: 20px; box-shadow: var(--card-shadow); height: fit-content; position: sticky; top: 100px; }
-        .map-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 18px; }
-        .map-btn { padding: 12px 5px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06); background: var(--light-bg); text-align: center; font-weight: 700; cursor: pointer; font-size: 13px; }
-        .map-btn.answered { background-color: #d1fae5; color: #065f46; border-color: #34d399; }
-        .map-btn.current { background-color: var(--primary-blue); color: white; border-color: var(--primary-blue); }
-
-        .progress-bar-container { background: rgba(0,0,0,0.05); border-radius: 10px; height: 10px; margin-bottom: 25px; overflow: hidden; }
-        .progress-bar-fill { background: linear-gradient(90deg, var(--teal-green), #34d399); height: 100%; width: 0%; }
-
-        .feedback-item { padding: 20px; border-radius: 12px; margin-top: 18px; border-right: 6px solid; background: var(--light-bg); line-height: 1.7; }
-        .feedback-correct { border-right-color: var(--success-color); background: rgba(40, 167, 69, 0.04); }
-        .feedback-wrong { border-right-color: var(--danger-color); background: rgba(229, 62, 62, 0.04); }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-bottom: 35px; }
-        .stat-card { background: var(--pure-white); padding: 25px; border-radius: 16px; box-shadow: var(--card-shadow); text-align: center; }
-        .stat-num { font-size: 32px; font-weight: 900; color: var(--teal-green); margin-bottom: 5px; }
-        
-        .charts-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 30px; }
-        @media (max-width: 768px) { .charts-container { grid-template-columns: 1fr; } }
-        .chart-box { background: var(--pure-white); padding: 25px; border-radius: 16px; box-shadow: var(--card-shadow); min-height: 340px; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--pure-white); border-radius: 12px; overflow: hidden; box-shadow: var(--card-shadow); }
-        th, td { padding: 16px 20px; text-align: right; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 14px; }
-        th { background: rgba(6, 64, 92, 0.03); color: var(--primary-dark); }
-
-        #portfolio-print-zone { display: none; background: #fff; color: #000; padding: 40px; }
-        @media print {
-            body * { display: none; }
-            #portfolio-print-zone, #portfolio-print-zone * { display: block; }
-            #portfolio-print-zone { width: 100%; position: absolute; top: 0; left: 0; }
-        }
-        footer { background: var(--primary-dark); color: white; text-align: center; padding: 20px; font-size: 13px; margin-top: auto; }
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; margin-bottom: 10px; }
-        .badge-ar { background-color: #d97706; }
-        .badge-math { background-color: #2563eb; }
-        .badge-sci { background-color: #059669; }
-        .badge-edu { background-color: #7c3aed; }
-    </style>
-</head>
-<body>
-
-    <header>
-        <div class="logo-section">
-            <div class="logo-text">
-                <h1>مجمع الأمير سلطان التعليمي</h1>
-                <p>نظام التقييم المعياري المطور - بوابة نافس وبوابة الرخصة المهنية</p>
-            </div>
-        </div>
-        <nav id="main-nav" style="display: none;">
-            <a id="nav-dashboard" onclick="switchPage('dashboard')">لوحة الإحصائيات الحية</a>
-            <a id="nav-quiz-hub" onclick="switchPage('quiz-hub')">بوابة الاختبارات الفعالة</a>
-            <a id="nav-logout" onclick="logout()" style="color: var(--danger-color)"><i class="fa-solid fa-arrow-right-from-bracket"></i> خروج</a>
-        </nav>
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <span id="welcome-msg" style="font-weight: 700; font-size: 14px; color: var(--primary-dark);"></span>
-            <button onclick="document.body.classList.toggle('dark-mode')" style="background:none; border:none; cursor:pointer; font-size: 18px; color: var(--text-color);"><i class="fa-solid fa-circle-half-stroke"></i></button>
-        </div>
-    </header>
-
-    <div id="page-auth" class="page-content active-page">
-        <div class="auth-container">
-            <i class="fa-solid fa-graduation-cap" style="font-size: 45px; color: var(--teal-green); margin-bottom: 20px;"></i>
-            <h2>منصة المحاكاة والقياس والتقويم الموحد</h2>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 25px;">يرجى تحديد مسارك بدقة لفتح النماذج المعتمدة رسمياً لمستواك.</p>
-            <div class="form-group">
-                <label>الاسم الكامل للمختبر:</label>
-                <input type="text" id="auth-name" placeholder="أدخل اسمك الثلاثي">
-            </div>
-            <div class="form-group">
-                <label>المسار التعليمي المستهدف:</label>
-                <select id="auth-role">
-                    <option value="طالب">أنا طالب (اختبار نافس الوطني الشامل - لغة عربية، رياضيات، علوم)</option>
-                    <option value="معلم">أنا معلم (اختبار الرخصة المهنية - المعايير التربوية العامة)</option>
-                </select>
-            </div>
-            <button class="btn-action" style="width: 100%; justify-content: center;" onclick="handleLogin()">تحميل المسار ودخول النظام</button>
-        </div>
-    </div>
-
-    <div id="page-dashboard" class="page-content">
-        <h2 id="dashboard-title">تحليل مخرجات ونواتج التعلم</h2>
-        <p style="color: var(--text-muted); margin-bottom: 30px;">لوحة تفاعلية حية تعرض مستوى تمكنك من مهارات التفكير العليا بناءً على معايير هيئة تقويم التعليم والتدريب.</p>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-num" id="stat-total-quizzes">0</div>
-                <div style="font-size: 13px; font-weight: 700; color: var(--text-muted);" id="stat-label-count">الاختبارات المنجزة</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-num" id="stat-avg-score">0%</div>
-                <div style="font-size: 13px; font-weight: 700; color: var(--text-muted);">معدل الإتقان العام للمهارات</div>
-            </div>
-        </div>
-
-        <div class="charts-container">
-            <div class="chart-box">
-                <h4>تحليل مجالات التفكير والكفايات الفردية</h4>
-                <canvas id="skillsChart"></canvas>
-            </div>
-            <div class="chart-box">
-                <h4>منحنى التطور الأكاديمي التراكمي</h4>
-                <canvas id="timelineChart"></canvas>
-            </div>
-        </div>
-
-        <div style="margin-top: 35px;">
-            <h3>سجل المحاولات المنجزة سابقاً</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>نوع ونظام الاختبار المعياري</th>
-                        <th>التاريخ والوقت</th>
-                        <th>مستوى الإتقان</th>
-                        <th>الفقرات الصحيحة</th>
-                        <th>الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="history-table-body"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="page-quiz-hub" class="page-content">
-        <div id="setup-quiz-zone">
-            <h2 id="hub-welcome-title">خادم توليد البنود المعيارية</h2>
-            <p id="hub-welcome-desc" style="color: var(--text-muted); margin-bottom: 25px;"></p>
+        if st.session_state.percentage >= 70:
+            st.success(f"مبروك! لقد اجتزت الاختبار بنسبة {st.session_state.percentage:.1f}% 🎉")
             
-            <div class="form-group" style="max-width: 500px;">
-                <button class="btn-action btn-purple" style="width: 100%; justify-content: center;" onclick="initiateSegregatedQuiz()">بناء مصفوفة الـ 30 فقرة الحقيقية والبدء <i class="fa-solid fa-wand-magic-sparkles"></i></button>
-            </div>
-        </div>
-
-        <div id="active-quiz-container" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 id="quiz-header-title" style="color: var(--primary-dark);"></h3>
-                <div style="background: var(--pure-white); padding: 8px 16px; border-radius: 20px; box-shadow: var(--card-shadow); color: var(--danger-color); font-weight: 800;">
-                    <i class="fa-regular fa-clock"></i> المؤقت التنازلي: <span id="quiz-clock">30:00</span>
-                </div>
-            </div>
-
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="quiz-progress-bar"></div>
-            </div>
+            # توليد الشهادة
+            cert_bytes = generate_certificate(user_name, domain_selected)
             
-            <div class="quiz-layout">
-                <div class="quiz-card" id="question-block">
-                    <span id="subject-badge" class="badge"></span>
-                    <h3 id="current-question-title" style="margin-bottom: 25px; line-height: 1.6;"></h3>
-                    
-                    <div id="options-block" class="options-container"></div>
-                    
-                    <div id="instant-feedback-block"></div>
-
-                    <div style="margin-top: 35px; display: flex; justify-content: space-between;">
-                        <button class="btn-action btn-secondary" onclick="stepQuestion(-1)"><i class="fa-solid fa-arrow-right"></i> السابق</button>
-                        <button class="btn-action btn-secondary" onclick="stepQuestion(1)">التالي <i class="fa-solid fa-arrow-left"></i></button>
-                    </div>
-                </div>
-
-                <div class="questions-map">
-                    <h4>خريطة بنود الاختبار (30 فقرة)</h4>
-                    <div class="map-grid" id="map-buttons-grid"></div>
-                    <button class="btn-action" style="width:100%; margin-top: 25px; justify-content: center; background-color: var(--danger-color);" onclick="endQuizAndCompileResults()">إنهاء الاختبار وتصحيح الإجابات <i class="fa-solid fa-square-check"></i></button>
-                </div>
-            </div>
-        </div>
-
-        <div id="feedback-result-container" style="display: none; margin-top: 35px;">
-            <div class="quiz-card" style="border: 2px solid var(--teal-green);">
-                <h3 style="color: var(--teal-green); margin-bottom: 10px;"><i class="fa-solid fa-square-poll-vertical"></i> التقرير الأكاديمي التفصيلي والتفنيد العلمي</h3>
-                <div id="score-summary-zone" style="font-size: 18px; font-weight: 800; color: var(--primary-dark); padding: 15px 0;"></div>
-                
-                <h4 style="margin: 20px 0 10px 0; color: var(--primary-blue);">تفاصيل تحليل الإجابات وتفنيد الأداء للـ 30 فقرة:</h4>
-                <div id="detailed-feedback-zone" style="max-height: 550px; overflow-y: auto; padding-right: 5px;"></div>
-                
-                <button class="btn-action btn-secondary" style="margin-top: 25px;" onclick="invokePortfolioPrinting()"><i class="fa-solid fa-print"></i> طباعة ملف الإنجاز الشامل وحفظه (PDF)</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="portfolio-print-zone">
-        <h1 style="text-align: center; color: #06405c;">بيان مخرجات التعلم وملف الإنجاز الأكاديمي الرسمي</h1>
-        <h3 style="text-align: center; color: #0a7e74; margin-bottom: 35px;">مجمع الأمير سلطان التعليمي - سجل رسمي لعام 2026م</h3>
-        <hr style="border: 2px solid #06405c;">
-        <div style="margin: 25px 0; font-size: 16px; line-height: 2.4;">
-            <p><strong>اسم المستفيد الكامل:</strong> <span id="print-name"></span></p>
-            <p><strong>المسار التعليمي المعياري المخصص:</strong> <span id="print-role"></span></p>
-            <p><strong>نوع المحاكاة المنفذة:</strong> <span id="print-topic"></span></p>
-            <p><strong>النتيجة المئوية ومستوى الإتقان:</strong> <span id="print-score"></span></p>
-            <p><strong>طابع وتوقيت الفحص التلقائي:</strong> <span id="print-date"></span></p>
-        </div>
-        <hr>
-        <h3 style="margin-top: 25px; color: #06405c;">تقرير تفنيد الأداء والتوجيه العلمي الصادر للـ 30 فقرة:</h3>
-        <div id="print-details" style="margin-top: 20px;"></div>
-    </div>
-
-    <footer>
-        <p>مجمع الأمير سلطان التعليمي © 2026 - نظام محاكاة الاختبارات الوطنية والمعيارية الفعال والمفصّل</p>
-    </footer>
-
-    <script>
-        // بنك أسئلة نافس - اللغة العربية (ممتد)
-        const NAFAS_ARABIC_BANK = [
-            { q: "ما الوظيفة البلاغية والنقدية المستنتجة من الآية: 'وَلَا تَجْعَلْ يَدَكَ مَغْلُولَةً إِلَىٰ عُنُقِكَ وَلَا تَبْسُطْهَا كُلَّ الْبَسْطِ'؟", c: "الكناية عن ذم البخل والتبذير والدعوة للاعتدال الحصيف.", w: ["التوجيه بربط الأيدي عند حدوث الشدائد والأزمات.", "الأمر بإنفاق كافة الأموال دفعة واحدة للمحتاجين.", "الإشارة إلى فضل الفقر التام على الغنى."], r: "الآية الكريمة تنهى عن حدّي الإفراط والتفريط كطبيعة سلوكية واقتصادية." },
-            { q: "قال الشاعر: 'إذا رأيتَ نيوبَ الليثِ بارزةً ... فلا تظننَّ أن الليثَ يبتسمُ'. ما الاستنتاج الضمني الأدق من هذا البيت؟", c: "الحذر الشديد من المظاهر الخادعة وعدم الاطمئنان للاستسلام الظاهري.", w: ["أن الأسود تبتسم عندما تبتهج.", "أن الابتسامة صفة بيولوجية مشتركة بين الكائنات.", "دعوة لدراسة الفك والأسنان للحيوانات المفترسة."], r: "البيت يدعو لنقد المظاهر وعدم الانخداع بالتبسم إذا كان من عدو متربص." },
-            { q: "ما الموقع الإعرابي الصحيح لكلمة 'متفوقينِ' في جملة: 'ظننتُ الطالبينِ متفوقينِ'؟", c: "مفعول به ثانٍ منصوب وعلامة نصبه الياء لأنه مثنى.", w: ["صفة منصوبة بالياء تتبع ما قبلها.", "مفعول به أول منصوب بالفتحة المقدرة.", "حال منصوب وعلامة نصبه الياء لأنه مثنى."], r: "الفعل 'ظن' ينصب مفعولين أصلهما مبتدأ وخبر." },
-            { q: "أي العبارات التالية تدل على أسلوب المدح الصحيح نحويًا وبنائيًا؟", c: "نعمَ الصديقُ الكتابُ نافعاً لفكرك.", w: ["يا ليتَ الصديقُ كتابٌ يفيدك.", "ما أجملَ الصديقُ الصادقُ في الوعد.", "بئسَ الصديقُ من يفشي سرك."], r: "أسلوب المدح يتكون من فعل المدح (نعم) والفاعل والمخصوص بالمدح." },
-            { q: "ما المعنى المتضمن للجملة التالية: 'أشرقت الشمس لكن المطرَ مستمرٌّ'؟", c: "الاستدراك لمنع الفهم الخاطئ بأن المطر توقف.", w: ["التعجب والدهشة من تقلبات الفصول.", "التوكيد على قوة حرارة الشمس.", "التحذير من الفيضانات المفاجئة."], r: "حرف 'لكن' يفيد الاستدراك لمنع توهم السامع لشيء مغاير للواقع." },
-            { q: "أي الكلمات التالية كُتبت فيها الهمزة المتوسطة بشكل صحيح بناءً على قاعدة أقوى الحركتين؟", c: "مُؤْمِن", w: ["مَؤْمِن", "مُئْمِن", "مُأْمِن"], r: "الهمزة ساكنة وما قبلها مضموم، والضمة أقوى من السكون لذا ترسم على واو." },
-            { q: "في جملة 'قرأتُ كتابينِ اثنينِ'، ما إعراب كلمة 'اثنينِ'؟", c: "نعت (صفة) منصوب وعلامة نصبه الياء لأنه ملحق بالمثنى.", w: ["مفعول به ثانٍ منصوب بالياء.", "توكيد لفظي مجرور بالكسرة.", "مضاف إليه مجرور بالياء لأنه مثنى."], r: "الأعداد 1 و 2 إذا تلت المعدود تعرب نعتاً وتطابقه في الإعراب." },
-            { q: "حدد التعبير المجازي (الاستعارة) من بين الجمل التالية:", c: "طارت الأخبارُ السارة في أرجاء مجمع الأمير سلطان.", w: ["قرأ الطلاب الأخبار في الصحيفة الرسمية.", "كتب المعلم تقريراً عن نواتج التعلم.", "ألقى مدير المدرسة كلمة ترحيبية بالضيوف."], r: "الأخبار لا تطير، فالعبارة استعارة مكنية حيث شبه الأخبار بطائر يطير." },
-            { q: "ما الفكرة المحورية التي تناقشها العبارة: 'الوقت كالسيف إن لم تقطعه قطعك'؟", c: "أهمية إدارة الوقت واستغلاله قبل فوات الأوان.", w: ["صناعة السيوف الحادة واستخداماتها.", "تفضيل المعارك التاريخية القديمة.", "تنظيم الحصص الدراسية للطلاب بالتساوي."], r: "المثل يضرب للحث على اغتنام الوقت والفرص في الأنشطة المفيدة." },
-            { q: "في نص يتحدث عن التلوث، وردت جملة 'أدى ذلك إلى تراجع الغطاء النباتي'. ما علاقة هذه الجملة بما قبلها؟", c: "نتيجة مترتبة على ما قبلها.", w: ["تعليل وتوضيح للأسباب.", "تفصيل بعد إجمال مبهم.", "تعارض وتناقض في الأفكار."], r: "العبارة توضح الأثر والنتيجة النهائية الناتجة عن ممارسات التلوث المذكورة سابقاً." },
-            { q: "ما سبب رسم الهمزة المتطرفة على السطر في كلمة (دفء)؟", c: "لأن ما قبلها حرف ساكن.", w: ["لأنها همزة مفتوحة.", "لأن ما قبلها حرف مضموم.", "لأنها مسبوقة بألف مد زائدة."], r: "الهمزة المتطرفة تُرسم على السطر إذا كان الحرف الذي يسبقها ساكناً." },
-            { q: "ما علامة إعراب الفاعل في جملة: (أبوك رجلٌ فاضلٌ)؟", c: "الواو لأنه من الأسماء الخمسة.", w: ["الضمة الظاهرة.", "الضمة المقدرة للثقل.", "الألف لأنه مثنى."], r: "الأسماء الخمسة تُرفع بالواو وتُنصب بالألف وتُجر بالياء." },
-            { q: "ما أسلوب الجملة التالية: (ما أجملَ ترابطَ أبناءِ الوطنِ!)؟", c: "أسلوب تعجب.", w: ["أسلوب تفضيل.", "أسلوب استفهام.", "أسلوب نداء."], r: "الجملة بدأت بـ (ما أفعل) وانتهت بعلامة تعجب، وهي الصيغة القياسية للتعجب." },
-            { q: "استخرج الكلمتين اللتين بينهما علاقة تضاد (طباق) في قول الشاعر: 'سَكَتُّ فَغَرَّ أَعْدائي السُكوتُ ... وَظَنّوني لِأَهلي قَد نَسيتُ'؟", c: "السكوت / نطق (الضمني في السياق) أو (تذكرت / نسيت).", w: ["أعدائي / أهلي", "غرّ / ظنّ", "سكتُّ / نسيتُ"], r: "التضاد في معاني النسيان والتذكر يُبرز المفارقة الذهنية في البيت." },
-            { q: "أي العبارات التالية خالية تماماً من الأخطاء الإملائية واللغوية؟", c: "إنّ القراءةَ تغذي عقولَ الناشئةِ.", w: ["إن القراءة تغذي عقول الناشئه.", "ان القراءه تغذي عقول الناشئة.", "إنّ القراءة تغذى عقول الناشئة."], r: "تطبيق التاء المربوطة، وهمزة القطع، والهمزة المتوسطة على نبرة في (الناشئة) تم بشكل دقيق." }
-        ];
-
-        // بنك أسئلة نافس - الرياضيات (ممتد)
-        const NAFAS_MATH_BANK = [
-            { q: "مضمار جري مستطيل طوله ضعف عرضه. إذا دار طالب دورة كاملة وقطع مسافة 600 متر، كم تبلغ مساحة المضمار بالـ م²؟", c: "20000", w: ["40000", "15000", "30000"], r: "المحيط = 2 × (الطول + العرض). 2 × (2س + س) = 600 -> 6س = 600 -> العرض = 100 والطول = 200. المساحة = 200 × 100 = 20000." },
-            { q: "إذا كان متوسط درجات 5 طلاب هو 85. وعند انضمام طالب سادس، أصبح المتوسط 87. كم درجة الطالب السادس؟", c: "97", w: ["90", "87", "95"], r: "مجموع الـ 5 = 425. مجموع الـ 6 = 522. درجة السادس = 522 - 425 = 97." },
-            { q: "خزان ماء مكعب الشكل طول ضلعه 2 متر. كم لترًا من الماء يتسع هذا الخزان إذا تم ملؤه بالكامل؟", c: "8000", w: ["2000", "4000", "1000"], r: "الحجم = 2 × 2 × 2 = 8 متر مكعب. والمتر المكعب يساوي 1000 لتر، إذن 8 × 1000 = 8000 لتر." },
-            { q: "إذا تم تخفيض سعر جهاز حاسب آلي بمجمع سلطان بنسبة 20%، ليصبح سعره الجديد 2400 ريال، فكم كان سعره الأصلي؟", c: "3000", w: ["2800", "2600", "3200"], r: "2400 تمثل 80% من السعر الأصلي. السعر الأصلي = (2400 × 100) ÷ 80 = 3000 ريال." },
-            { q: "ما هو القاسم المشترك الأكبر (الأعلى) للعددين 24 و 36؟", c: "12", w: ["6", "8", "18"], r: "عوامل 24 هي 1,2,3,4,6,8,12,24 وعوامل 36 أكبر قاسم مشترك بينهما هو 12." },
-            { q: "إذا انطلقت سيارة بسرعة ثابتة قدرها 90 كم/ساعة، فكم دقيقة تستغرق لقطع مسافة 45 كيلومتراً؟", c: "30", w: ["45", "20", "60"], r: "الزمن = المسافة ÷ السرعة = 45 ÷ 90 = 0.5 ساعة. ونصف الساعة يساوي 30 دقيقة." },
-            { q: "صندوق يحتوي على 5 كرات حمراء، 3 كرات زرقاء، و2 كرة خضراء. ما احتمال سحب كرة زرقاء عشوائياً؟", c: "3/10", w: ["1/2", "1/5", "3/5"], r: "العدد الإجمالي للكرات = 5+3+2 = 10. احتمال الزرقاء = عدد الكرات الزرقاء ÷ الإجمالي = 3/10." },
-            { q: "حل المعادلة التالية لإيجاد قيمة س: 3س + 7 = 22.", c: "5", w: ["4", "6", "7"], r: "3س = 22 - 7 -> 3س = 15 -> س = 15 ÷ 3 = 5." },
-            { q: "ما هي قيمة الزاوية الثالثة في مثلث إذا كانت قيمتا الزاويتين الأوائل هي 50 درجة و 70 درجة؟", c: "60", w: ["50", "70", "80"], r: "مجموع زوايا المثلث الداخلية دائماً 180 درجة. الزاوية = 180 - (50 + 70) = 60 درجة." },
-            { q: "إذا كان عمر أحمد الآن 3 أضعاف عمر ابنه، وبعد 10 سنوات يصبح مجموع عمريهما 60 سنة، كم عمر أحمد الآن؟", c: "30", w: ["35", "40", "25"], r: "س + 3س + 20 = 60 -> 4س = 40 -> س (الابن) = 10، إذن الأب أحمد = 3 × 10 = 30 سنة." },
-            { q: "مستطيل محيطه 24 سم وطوله 8 سم، فما هو عرضه بالسنتمتر؟", c: "4", w: ["6", "8", "2"], r: "نصف المحيط = 12 سم. العرض = نصف المحيط - الطول = 12 - 8 = 4 سم." },
-            { q: "اشترى محمد سلعة بقيمة 500 ريال وقرر بيعها بهامش ربح 15%، فبكم ريال باعها؟", c: "575", w: ["515", "550", "600"], r: "مقدار الربح = 500 × 0.15 = 75 ريال. سعر البيع = 500 + 75 = 575 ريال." },
-            { q: "ما هو المتوسط الحسابي للأعداد التالية: 3، 5، 7، 9؟", c: "6", w: ["5", "7", "8"], r: "المجموع = 3+5+7+9 = 24. المتوسط = 24 ÷ 4 = 6." },
-            { q: "إذا تم تدوير مؤشر قرص مقسم بالتساوي إلى 8 أرقام (من 1 إلى 8)، فما احتمال استقرار المؤشر على عدد زوجي؟", c: "1/2", w: ["1/4", "3/8", "5/8"], r: "الأعداد الزوجية هي 2، 4، 6، 8 (أربعة أعداد). الاحتمال = 4 ÷ 8 = 1/2." },
-            { q: "أوجد قيمة س في المعادلة: 2س - 4 = 10.", c: "7", w: ["5", "6", "8"], r: "2س = 10 + 4 -> 2س = 14 -> س = 7." }
-        ];
-
-        // بنك أسئلة نافس - العلوم (ممتد)
-        const NAFAS_SCIENCE_BANK = [
-            { q: "عند زيادة الضغط الواقع على غاز محصور مع ثبات درجة حرارته، يقل حجمه للنصف. ما القانون المفسر لذلك؟", c: "قانون بويل للغازات", w: ["قانون شارل", "قانون غاي-لوساك", "قانون نيوتن الثالث"], r: "قانون بويل يثبت العلاقة العكسية بين حجم الغاز وضغطه عند ثبات الحرارة." },
-            { q: "لماذا يشعر الشخص بالحرارة سريعاً عند لمس ملعقة معدنية موضوعة بماء مغلي مقارنة بملعقة خشبية؟", c: "لأن المعادن تحتوي على إلكترونات حرة تجعلها موصلات ممتازة للحرارة.", w: ["لأن الخشب يمتص الحرارة ويخفيها.", "لأن الملعقة المعدنية تزن أكثر.", "لأن الماء المغلي يتفاعل كيميائياً مع المعادن."], r: "المعادن مواد جيدة التوصيل للحرارة والكهرباء نظراً لوفرة الإلكترونات الحرة وحركتها." },
-            { q: "أي التراكيب التالية توجد في الخلايا النباتية فقط ولا توجد في الخلايا الحيوانية؟", c: "البلاستيدات الخضراء والجدار الخلوي", w: ["النواة والغشاء البلازمي", "الميتوكوندريا والسيتوبلازم", "الريبوسومات والجسم المركزي"], r: "الجدار الخلوي والبلاستيدات الخضراء المسؤولة عن البناء الضوئي تميز الخلايا النباتية." },
-            { q: "ما هي الظاهرة الطبيعية التي تنتج بشكل مباشر عن دوران الأرض حول محورها كل 24 ساعة؟", c: "تعاقب الليل والنهار", w: ["تتابع الفصول الأربعة", "حدوث ظاهرة الكسوف", "حركة المد والجزر"], r: "دوران الأرض حول نفسها أمام الشمس ينتج عنه تعاقب الليل والنهار على نصفي الكرة الأرضية." },
-            { q: "أي العناصر الكيميائية التالية يعتبر غازاً نبيلاً (خاملاً) لا يتفاعل بسهولة في الظروف القياسية？", c: "الهيليوم (He)", w: ["الأكسجين (O2)", "الهيدروجين (H2)", "الصوديوم (Na)"], r: "الغازات النبيلة مثل الهيليوم والنيون تتميز بامتلاء مداراتها الخارجية بالإلكترونات مما يجعلها مستقرة." },
-            { q: "ما نوع الرابطة الكيميائية الناشئة عن تشارك زوج أو أكثر من الإلكترونات بين ذرتين من اللافلزات؟", c: "رابطة تساهمية", w: ["رابطة أيونية", "رابطة هيدروجينية", "رابطة فلزية"], r: "الروابط التساهمية تنشأ من التشارك والمساهمة بالإلكترونات بين الذرات اللافلزية." },
-            { q: "ما وظيفة الميتوكوندريا الأساسية داخل الخلية الحية؟", c: "إنتاج وتحرير الطاقة للخلية (ATP)", w: ["صناعة البروتينات المختلفة", "حفظ وتخزين المادة الوراثية", "تعديل وتغليف المواد الكيميائية"], r: "الميتوكوندريا هي مصانع الطاقة للخلية حيث يتم فيها التنفس الخلوي لإنتاج غاز ATP." },
-            { q: "أي المجموعات الغذائية التالية تعتبر المصدر الرئيسي والأسرع للحصول على الطاقة في جسم الإنسان؟", c: "الكربوهيدرات", w: ["البروتينات", "الفيتامينات", "الدهون المشبعة"], r: "الكربوهيدرات تتفكك سريعاً إلى جلوكوز وهو الوقود المفضل والأسرع لإنتاج طاقة الخلايا." },
-            { q: "ما الاسم العلمي الذي يطلق على عملية تحول المادة من الحالة الصلبة إلى الغازية مباشرة دون المرور بالسائلة؟", c: "التسامي", w: ["التبخر", "الانصهار", "التكثف"], r: "التسامي هو تحول المادة من صلب إلى غاز مباشرة مثل تحول الجليد الجاف." },
-            { q: "أي الكواكب التالية يعتبر أقرب الكواكب إلى الشمس في مجموعتنا الشمسية؟", c: "عطارد", w: ["الزهرة", "المريخ", "الأرض"], r: "عطارد هو الكوكب الأول والأقرب لمركز المجموعة الشمسية يليه الزهرة ثم الأرض." },
-            { q: "أي الغازات التالية هو الأكثر وفرة وتواجداً في الغلاف الجوي للأرض؟", c: "النيتروجين", w: ["الأكسجين", "ثاني أكسيد الكربون", "الهيدروجين"], r: "النيتروجين يشكل حوالي 78% من الغلاف الجوي للأرض." },
-            { q: "ما هي وحدة بناء الكائن الحي الأساسية والتركيبية؟", c: "الخلية", w: ["النسيج", "العضو", "الجهاز الحيوى"], r: "الخلية هي أصغر وحدة حية ومسؤولة عن جميع العمليات والوظائف الأساسية." },
-            { q: "ما نوع التكاثر الذي يعتمد على فرد أبوي واحد دون الحاجة لأمشاج ذكرية وأنثوية؟", c: "التكاثر اللاجنسي", w: ["التكاثر الجنسي", "الإخصاب الخارجي", "الاقتران الثنائي"], r: "التكاثر اللاجنسي ينتج عنه أفراد مطابقة جينياً للأصل وبدون مشاركة خلايا جنسية." },
-            { q: "أي الكواكب في نظامنا الشمسي يُطلق عليه تاريخياً اسم 'الكوكب الأحمر'؟", c: "المريخ", w: ["الزهرة", "المشتري", "زحل"], r: "يسمى المريخ بالكوكب الأحمر بسبب وفرة أكسيد الحديد على سطحه." },
-            { q: "ما اسم القوة التي تنشأ بين سطوح الأجسام المتلامسة وتعمل على مقاومة حركتها؟", c: "قوة الاحتكاك", w: ["قوة الجاذبية", "القوة المغناطيسية", "قوة الدفع الميكانيكي"], r: "الاحتكاك هي قوة فيزيائية ممانعة تعيق انزلاق جسم فوق جسم آخر." }
-        ];
-
-        // بنك أسئلة الرخصة المهنية - كفايات تربوية (ممتد ومحدث إلى 40 سؤالاً)
-        const PROFESSIONAL_EDU_BANK = [
-            { q: "إذا كان معامل التمييز لأحد الأسئلة في اختبار تحصيلي هو (-0.15)، فما الإجراء الصحيح بحسب معايير القياس؟", c: "حذف السؤال تماماً من الاختبار لأنه يميز مقلوباً.", w: ["إبقاء السؤال كما هو دون تغيير.", "تعديل الصياغة اللفظية فقط للسؤال.", "زيادة الدرجة المخصصة للسؤال لتعويض الطلاب."], r: "التمييز السالب يعني أن الضعاف أجابوا بشكل صحيح والمتفوقين أخطأوا، وهو خلل كبير." },
-            { q: "طلب معلم تقديم أكبر عدد ممكن من الاستخدامات غير التقليدية لعلبة بلاستيكية. ما المهارة المستهدفة؟", c: "الطلاقة والمرونة والأصالة (التفكير الإبداعي والتباعدي).", w: ["التفكير التقاربي والذكاء المنطقي الرياضي الحاد.", "الحفظ والاستظهار السريع للمعلومات البيئية.", "مهارة الاستماع والإنصات السلبي لأوامر المعلم."], r: "إنتاج أفكار متعددة ومتنوعة وغير مألوفة يقع مباشرة تحت مظلة التفكير الإبداعي." },
-            { q: "أي النظريات التربوية تركز على أن التعلم يحدث نتيجة تعديل البنية المعرفية الداخلية وعمليتي التمثيل والمواءمة؟", c: "النظرية المعرفية البنائية (جان بياجيه)", w: ["النظرية السلوكية", "النظرية الاشتراطية الكلاسيكية", "النظرية الاجتماعية"], r: "بياجيه يرى التعلم كعملية تنظيم ذاتي ومواءمة المخططات المعرفية الحالية مع الخبرات الجديدة." },
-            { q: "عندما يضع المعلم معايير واضحة لتقويم أداء الطلاب في مشروع معين لضمان العدالة والموضوعية، فإنه يستخدم:", c: "قوائم رصد أو سلالم التقدير اللفظية (Rubrics)", w: ["الاختبارات التشخيصية القبلية", "أسلوب المقابلة الشخصية العفوية", "خرائط المفاهيم الذهنية"], r: "سلالم التقدير اللفظية توفر معايير أداء محددة تضمن الموضوعية التامة في رصد الدرجات المهنية." },
-            { q: "المصطلح التربوي الذي يصف قيام المعلم بملاحظة أدائه التعليمي وتعديله ذاتياً لتحسين نواتج التعلم هو:", c: "التأمل المهني الذاتي (Reflective Teaching)", w: ["الاستقصاء التعاوني الموجه", "التوجيه المدرسي الإرشادي", "التدريس المصغر التقني"], r: "التأمل المهني هو أداة رئيسية لتطوير المعلم من خلال نقد وتحليل ممارساته الصفية بانتظام." },
-            { q: "وفقاً لتصنيف بلوم للأهداف المعرفية، يقع هدف 'أن يكتشف الطالب الأخطاء العلمية في التقرير' تحت مستوى:", c: "التحليل", w: ["الفهم", "التطبيق", "التذكر"], r: "اكتشاف العلاقات والأخطاء والأجزاء يقع تحت مهارة التحليل والتفكيك." },
-            { q: "ما هو الإجراء الأول والأكثر كفاءة لمعالجة مشكلة سلوكية بسيطة من أحد الطلاب لأول مرة داخل الصف؟", c: "التجاهل التكتيكي العابر أو الإشارات غير اللفظية (اللمس البصري).", w: ["إرسال الطالب مباشرة إلى إدارة المدرسة.", "توبيخ الطالب بصوت مرتفع أمام زملائه.", "حرمان الطالب من درجات المشاركة للفصل بأكمله."], r: "تعديل السلوك يبدأ بالتلميحات البسيطة غير اللفظية لمنع تعطيل بيئة سير الحصة الدراسية الحالية." },
-            { q: "أي من أنواع التقويم التالية يهتم بالدرجة الأولى بتحديد نقاط القوة والضعف لعلاج الفجوات التعليمية أثناء العام الدراسي؟", c: "التقويم التكويني (البنائي)", w: ["التقويم الختامي (النهائي)", "التقويم القبلي (التمهيدي)", "التقويم المعياري الخارجي"], r: "التقويم التكويني يصاحب العملية التعليمية لمراقبة تقدم الطلاب وإعطاء تغذية راجعة مستمرة." },
-            { q: "أراد معلم مراعاة الذكاء البصري المكاني لطلابه داخل الحصة، أي الأنشطة التالية يعتبر الأنسب لهم؟", c: "استخدام خرائط المفاهيم والرسوم التوضيحية ومقاطع الفيديو.", w: ["إجراء مناظرات لغوية خطابية بين الطلاب.", "إعطاء مسائل حسابية معقدة تحتاج لخطوات منطقية.", "الطلب منهم القيام بتمثيل أدوار حركية مسرحية."], r: "أصحاب الذكاء البصري يتعلمون بفاعلية أكبر عبر الصور والأشكال والتمثيل المرئي للبيانات." },
-            { q: "وفقاً لتسلسل ماسلو للهرم الإنساني للااحتياجات، ما هي الحاجة الأساسية التي يجب إشباعها أولاً ليقبل الطالب على التعلم؟", c: "الحاجات الفسيولوجية (مثل الغذاء والأمان البدني).", w: ["حاجة تقدير الذات والافتخار.", "حاجة تحقيق الذات والابتكار الكلي.", "الحاجات الاجتماعية والانتماء للأصدقاء."], r: "ماسلو يرى أن الحاجات البيولوجية والفسيولوجية والأمان تشكل قاعدة الهرم ولا يمكن الانتقال للأعلى بدونها." },
-            { q: "أي الخيارات التالية يعبر عن مفهوم 'الصدق' في بناء الاختبارات التحصيلية؟", c: "أن يقيس الاختبار ما وُضع بالفعل لقياسه دون تأثر بعوامل أخرى.", w: ["أن يعطي الاختبار نفس النتائج إذا أُعيد تطبيقه.", "أن تكون صياغة الأسئلة سهلة لجميع مستويات الطلاب.", "أن يشمل الاختبار كافة صفحات الكتاب المدرسي بالتساوي."], r: "الصدق يعني دقة القياس للهدف المراد، بينما الثبات هو استقرار النتائج عند إعادة التطبيق الإحصائي." },
-            { q: "ما هو الهدف الجوهري من إعداد واستخدام 'جدول المواصفات' عند بناء الاختبارات الرسمية؟", c: "تحقيق التوازن والصدق المحتوي وتوزيع الأسئلة وفقاً للأوزان النسبية للدروس.", w: ["تسهيل عملية التصحيح الآلي للمعلمين بالكنترول.", "تحديد الوقت الزمني المناسب لإنهاء ورقة الامتحان.", "مساعدة إدارة المدرسة في رصد وتدقيق الغياب."], r: "جدول المواصفات هو مخطط يربط محتوى المادة بمستويات الأهداف المعرفية لضمان شمولية الاختبار للدروس." },
-            { q: "منهجية التدريس التي تقسم الطلاب إلى مجموعات صغيرة غير متجانسة لتحقيق هدف تعليمي مشترك تسمى:", c: "التعلم التعاوني (Cooperative Learning)", w: ["التدريس المباشر الإلقائي", "التعلم الفردي الذاتي", "العصف الذهني الحر"], r: "التعلم التعاوني يرتكز على دمج مستويات مختلفة من الطلاب للعمل معاً وتبادل الخبرات وحل المهام." },
-            { q: "إذا لاحظ المعلم أن طالباً متميزاً انخفض مستواه فجأة بشكل ملحوظ، ما الإجراء المهني الأول والسليم؟", c: "إحالة الطالب أو التنسيق مع الموجه الطلابي لدراسة حالته النفسية أو الأسرية.", w: ["توجيه عقاب بدني فوري لتقصيره الأخير.", "نقله إلى الفصل الأدنى دراسياً كعقوبة رادعة.", "تجاهل المشكلة واعتبارها كبوة مؤقتة ستزول تلقائياً."], r: "دراسة الفجوات المفاجئة تتطلب عملاً إرشادياً مهنياً لمعرفة الأسباب النفسية أو الاجتماعية المؤثرة." },
-            { q: "أي من استراتيجيات التدريس التالية تتمحور بالكامل حول الطالب وتعتمد على إعطائه معطيات للوصول إلى القاعدة العامة؟", c: "الاستقراء (Induction)", w: ["الاستنتاج القياسي", "المحاضرة والالقاء", "النمذجة والمحاكاة السلبية"], r: "الاستقراء يبدأ من الأمثلة والجزئيات للوصول إلى القوانين والقواعد العامة والتعميمات." },
-            { q: "وفقاً لنظرية النمو المعرفي لبياجيه، في أي مرحلة يبدأ الفرد بالقدرة على التفكير المجرد ووضع الفرضيات المنطقية؟", c: "مرحلة العمليات المجردة / الشكلية (من سن 11 فما فوق)", w: ["مرحلة ما قبل العمليات الإجرائية", "المرحلة الحس حركية الأولية", "مرحلة العمليات المادية المحسوسة"], r: "التفكير المجرد والافتراضي وحل المشكلات الفلسفية المعقدة يتشكل تماماً في مرحلة العمليات الرسمية." },
-            { q: "الدافعية التي تنبع من رغبة الطالب الداخلية في التعلم حباً في المعرفة والشعور بالإنجاز تسمى بالدافعية:", c: "الداخلية (Intrinsic Motivation)", w: ["الخارجية (Extrinsic)", "المجتمعية البيئية", "الشرطية المؤقتة"], r: "الدافعية الداخلية هي المحرك الذاتي للفرد نحو التعلم دون انتظار مكافآت أو جوائز خارجية مادية." },
-            { q: "توفير وسيلة مساعدة مؤقتة للطلاب أثناء بناء المفهوم الجديد، ثم سحبها تدريجياً حتى يعتمدوا على أنفسهم يُعرف بـ:", c: "الدعم أو السقالات التعليمية (Scaffolding)", w: ["التعلّم الذاتي المستقل", "التعزيز الإيجابي المستمر", "التغذية الراجعة التفسيرية"], r: "السقالات التعليمية (مفهوم فيغوتسكي) تقدم دعماً مرحلياً للطالب لمساعدته في منطقة النمو الوشيك." },
-            { q: "أسلوب تدريسي يهدف لتوليد سيل من الأفكار الإبداعية من الطلاب دون نقد أو تقييم في المراحل الأولى يسمى:", c: "العصف الذهني (Brainstorming)", w: ["التدريس المصغر التقني", "حل المشكلات الرياضية", "المناقشة والحوار الموجه"], r: "العصف الذهني يمنع النقد في البداية لتوفير مناخ حر يساعد على تدفق كافة الأفكار والحلول الابتكارية." },
-            { q: "أي مما يلي يعتبر الميزة الجوهرية لاستخدام 'ملف الإنجاز' (Portfolio) كأداة تقويم بديل متطورة؟", c: "يوثق نمو وتطور أداء الطالب وأعماله التأملية على مدار فترة زمنية طويلة.", w: ["سهولة وسرعة رصد الدرجات إلكترونياً بالمقارنة بالاختبار.", "التركيز على قياس الحفظ والاستظهار المباشر للمعلومات.", "أنه لا يتطلب جهداً أو وقتاً من الطالب والمعلم برمتهم."], r: "البورتفوليو يقيس الأداء الواقعي التطوري ويوثق نتاجات التعلم التأملية للطالب والمهارات المكتسبة." },
-            { q: "ما المكون الأول الذي يجب صياغته بدقة عند التخطيط لبناء وتصميم الوحدة الدراسية التعليمية؟", c: "الأهداف التعليمية ونواتج التعلم المستهدفة (Learning Outcomes)", w: ["الوسائل التعليمية والتكنولوجية المصاحبة", "أساليب التقويم والاختبار النهائي للوحدة", "الأنشطة الصفية واللاصفية المقترحة للطلاب"], r: "التخطيط السليم يبدأ دائماً بتحديد الغايات والأهداف التي توجه اختيار المحتوى والوسائل والتقويم." },
-            { q: "قيام المعلم بتقديم مكافأة للطالب فور إجابته المتميزة يمثل تطبيقاً لأسلوب التعزيز المستمد من النظرية:", c: "السلوكية (Behaviorism)", w: ["المعرفية", "البنائية الاجتماعية", "الإنسانية الروحية"], r: "النظرية السلوكية (سكنر) تعتمد كلياً على ثنائية (المثير والاستجابة) والتعزيز الفوري لتثبيت السلوك الإيجابي." },
-            { q: "تعد الفروق الفردية بين الطلاب ظاهرة طبيعية، والواجب المهني على المعلم للتعامل معها بفاعلية وكفاءة هو:", c: "تنويع استراتيجيات التدريس والوسائل وأساليب التقويم لتناسب كافة المستويات.", w: ["التركيز التام على الطلاب المتفوقين لإبراز نجاح المدرسة.", "شرح الدرس بمستوى واحد ثابت ومطالبة الجميع بالاستيعاب الفوري.", "إعطاء الطلاب الضعاف درجات إضافية مجانية دون تقويم حقيقي."], r: "التدريس المتمايز ينطلق من الإيمان بالفروق الفردية ويوفر مسارات متعددة للتعلم لتلبية احتياجات الجميع." },
-            { q: "أي الكلمات التالية يعبر عن مفهوم 'التطوير المهني المستمر' للمعلمين؟", c: "الممارسات المهنية المخططة التي تهدف لتطوير كفايات المعلمين المعرفية والمهارية.", w: ["الإشراف التربوي الدائم والرقابة المستمرة.", "التقويم المؤسسي السنوي للمدرسة.", "الإدارة الصفية الذكية للمشاكل السلوكية."], r: "التطوير المهني المستمر يشمل البرامج والورش والمجتمعات المهنية لرفع كفاءة المعلمين لمواكبة التحديثات." },
-            { q: "إذا أراد المعلم استخدام أسلوب تدريسي ينمي مهارة البحث العلمي وصنع القرارات وجمع البيانات ميدانياً، فإنه يختار:", c: "التعلم القائم على المشاريع (Project-Based Learning)", w: ["الإلقاء والمحاضرة الصفية", "التعليم المبرمج الفردي", "الاستظهار التلقائي للمصطلحات"], r: "المشاريع تدمج مجالات عملية ومهارات بحثية تطلب من الطلاب استقصاء مشكلة حقيقية وتقديم منتج نهائي." },
-            { q: "أي مستويات الأهداف المعرفية التالية يمثل القدرة على إصدار حكم على قيمة المواد والأفكار وفق معايير محددة؟", c: "التقويم (Evaluation)", w: ["التحليل", "التركيب", "التطبيق"], r: "التقويم يقع في قمة تصنيف بلوم التقليدي المعرفي، ويعني القدرة على المحاكمة النقدية وإصدار الأحكام العلمية." },
-            { q: "مفهوم 'مجتمعات التعلم المهنية' (PLCs) داخل المدرسة يركز بالدرجة الأولى والأساسية على عقلية:", c: "التعاون بين المعلمين لمناقشة تحديات التدريس وتحسين مخرجات التعلم.", w: ["التنافس الفردي بين المعلمين للحصول على جوائز التميز الحصرية.", "مراقبة حضور وغياب الطاقم الإداري وتدقيق الأوراق الرسمية.", "توزيع النصاب التدريسي والحصص بالتساوي التام بين المعلمين."], r: "مجتمعات التعلم المهنية تهدف لتحويل المدارس إلى مؤسسات متعلمة يتبادل فيها المعلمون الخبرات لحل فجوات التعلم." },
-            { q: "أي الإجراءات التالية يحقق التواصل الإيجابي الفعال والمعتمد مع أولياء أمور الطلاب لإطلاعهم على مستويات أبنائهم؟", c: "إرسال تقارير دورية منظمة وعقد لقاءات مجدولة لمناقشة نواتج التعلم والخطط العلاجية.", w: ["الاتصال الدائم بأولياء الأمور في أوقات متأخرة عند ارتكاب أي مخالفة بسيطة.", "الامتناع عن التواصل معهم إلا في حالات الرسوب النهائي للطالب.", "نشر درجات الطلاب وعرضها علناً في لوحات الإعلانات العامة بالمدرسة."], r: "الشراكة الرسمية والمنظمة مع الأسرة تتطلب تقارير بنائية دورية وشفافة تدعم نمو مخرجات الطالب الأكاديمية." },
-            { q: "عندما يصمم المعلم نشاطاً يطلب فيه من الطلاب بناء نموذج مجسم لكوكب الأرض مستخدمين الصلصال، فإنه يستهدف:", c: "الذكاء الحركي والجسدي والمكاني.", w: ["الذكاء اللغوي والخطابي الشفهي.", "الذكاء الموسيقي والإيقاعي السمعي.", "الذكاء المنطقي الرياضي التجريدي البحت."], r: "استخدام الأيدي والتشكيل وتجسيم الأبعاد يخدم الذكاءين الحركي الجسدي والمكاني البصري للطلاب." },
-            { q: "أي مما يلي يصف الممارسات المهنية المعتمدة للمنسق والمسؤول عن لجان 'الأمن والسلامة المدرسية' داخل البيئة التعليمية؟", c: "إعداد خطط الإخلاء الدورية، فحص وسائل السلامة، ونشر ثقافة الوعي بالمخاطر.", w: ["رصد درجات اختبارات نافس وتدقيق مصفوفة التحصيل الدراسي.", "متابعة غياب وتأخر الطاقم الإداري والكادر التعليمي للمدرسة.", "شرح المناهج الدراسية وتقديم حصص التقوية للطلاب المتعثرين."], r: "منسق الأمن والسلامة يركز كلياً على توفير بيئة تعليمية آمنة وخالية من المخاطر عبر خطط وقائية وعملية معتمدة." },
+            st.image(cert_bytes, caption="معاينة شهادتك", use_container_width=True)
             
-            // إضافة 10 أسئلة إضافية لتفعيل الخلط العشوائي الحقيقي (من 31 إلى 40)
-            { q: "النظرية التي تؤكد على أن التعلم الإنساني يرتكز أساساً على الملاحظة والتقليد والنمذجة الاجتماعية هي نظرية:", c: "التعلم الاجتماعي (ألبرت باندورا)", w: ["الاشتراط الإجرائي", "النمو المعرفي", "الجشطالت الكلية"], r: "نظرية التعلم الاجتماعي تؤكد دور المحاكاة والنمذجة للآخرين في اكتساب السلوك." },
-            { q: "من الشروط الفنية والصياغية الأساسية لبناء وصياغة الهدف السلوكي الناجح أن يكون:", c: "قابلاً للملاحظة والقياس المباشر ومرتكزاً على أداء المتعلم.", w: ["شاملاً لعدة نواتج تعليمية معقدة في جملة واحدة.", "مرتكزاً كلياً على طريقة الشرح التي يعتمدها المعلم.", "مكتوباً بلغة عامة وفلسفية غير محددة بزمن."], r: "الهدف السلوكي الدقيق والحديث يجب أن يُقاس ويُلاحظ بوضوح ويركز على ما يستطيع الطالب فعله." },
-            { q: "ما هو الأسلوب الإحصائي البياني الأكثر كفاءة وملاءمة لعرض نسب مستويات تقدير الطلاب داخل المدرسة؟", c: "القطاعات الدائرية (Pie Charts)", w: ["المنحني التكراري الخطي", "خرائط التدفق البيانية", "التمثيل بنقاط التشتت الطولي"], r: "القطاعات الدائرية تُعتبر الأفضل عالمياً لعرض وتمثيل الأجزاء بالنسبة المئوية الكلية للمجموعة." },
-            { q: "الاضطراب أو الصعوبة الأكاديمية التي تصف تعثر الطالب في مهارات القراءة وصعوبة معالجة الكلمات تُعرف بـ:", c: "الديسليكسيا (Dyslexia)", w: ["الديسكالكوليا (عسر الحساب)", "الديسغرافيا (عسر الكتابة)", "التوحد السلوكي البسيط"], r: "الديسليكسيا هو المصطلح العلمي التربوي المعتمد لعسر القراءة النمائي الأكاديمي." },
-            { q: "تُصنف الاستراتيجية النشطة القائمة على مراحل (فكر - زاوج - شارك) ضمن استراتيجيات:", c: "التعلم التعاوني النشط.", w: ["التعلم الذاتي المستقل تماماً.", "التدريس الإلقائي والمحاضرة.", "التقويم الختامي المنفصل."], r: "تعتمد على المناقشة الثنائية ثم الجماعية لتبادل الحلول وتحسين الفهم المشترك." },
-            { q: "أي من مقاييس التشتت التالية يعبر إحصائياً وبدقة عن مدى تباعد القيم والدرجات عن متوسطها الحسابي؟", c: "الانحراف المعياري (Standard Deviation)", w: ["المنوال الإحصائي", "المتوسط الحسابي", "الوسيط الحسابي"], r: "الانحراف المعياري يقيس مدى تشتت وتباعد الدرجات الفردية حول المتوسط الحسابي العام." },
-            { q: "عندما يفتتح المعلم الحصة بطرح سؤال مثير للاهتمام وتحدٍ فكري يقود لاكتشاف الموضوع، فإنه يوظف:", c: "التهيئة الحافزة وإثارة الدافعية.", w: ["التقويم الختامي المعياري.", "التغذية الراجعة السلبية السريعة.", "العقاب المعرفي الموجه."], r: "التهيئة الحافزة والذكية تستهدف شد انتباه الفضول الأكاديمي للمتعلمين قبل البدء الفعلي بالحصة." },
-            { q: "تعد مواءمة وبناء الدرس بما يتماشى مع معايير المنهج الوطني خطوة أساسية تتبع مرحلة:", c: "التخطيط المسبق للتدريس وبناء خطة الدرس.", w: ["التقويم النهائي ورصد الدرجات بالكنترول.", "تطبيق الأنشطة اللاصفية والرحلات.", "تحسين أداء الهيئة الإدارية للمدرسة."], r: "التخطيط الناجح والمهني يستدعي دمج ومحاذاة الأهداف الدراسية مع المعايير الرسمية الوطنية مبكراً." },
-            { q: "القدرة الفردية على فهم الشخص لمشاعره الذاتية، قدراته، مواطن قوته وضعفه تُعبر عن ذكاء:", c: "الذكاء الذاتي أو الشخصي الداخلي.", w: ["الذكاء الاجتماعي التفاعلي.", "الذكاء المنطقي والرياضي العالي.", "الذكاء الحركي الإيقاعي الجسدي."], r: "الذكاء الذاتي (وفق غاردنر) هو وعي الفرد التام بذاته وقدراته وتوجيه قراراته الشخصية بناءً عليها." },
-            { q: "أي مما يلي يصف الاختبار 'معياري المرجع' (Norm-referenced Test)؟", c: "اختبار يقارن فيه أداء الطالب بأداء زملائه وأقرانه من نفس الفئة.", w: ["اختبار يقارن مستوى الطالب بمستوى تمكنه الشخصي المحدد مسبقاً.", "اختبار مصمم لتقويم المعلم والوسائل الدراسية فقط.", "اختبار تشخيصي لا يترتب عليه رصد أي درجات نهائية."], r: "معياري المرجع يرتكز على مقارنة أداء الفرد بنسب توزيع درجات المجموعة المرجعية (أقرانه)." }
-        ];
-
-        let currentUser = null;
-        let currentQuestions = [];
-        let currentQuestionIndex = 0;
-        let timerInterval = null;
-        let lastReport = {};
-        let skillsChartInstance = null;
-        let timelineChartInstance = null;
-
-        window.onload = function() {
-            const saved = localStorage.getItem('sultan_official_user_v2');
-            if(saved) {
-                currentUser = JSON.parse(saved);
-                authorizeUserEnvironment();
-            }
-        };
-
-        function handleLogin() {
-            const name = document.getElementById('auth-name').value.trim();
-            const role = document.getElementById('auth-role').value;
-            if(!name || name.length < 5) { alert("يرجى إدخال اسمك الثلاثي بشكل رسمي للتوثيق."); return; }
-            currentUser = { name: name, role: role };
-            localStorage.setItem('sultan_official_user_v2', JSON.stringify(currentUser));
-            authorizeUserEnvironment();
-        }
-
-        function authorizeUserEnvironment() {
-            document.getElementById('page-auth').classList.remove('active-page');
-            document.getElementById('main-nav').style.display = 'flex';
-            
-            if (currentUser.role === "طالب") {
-                document.getElementById('welcome-msg').innerText = `الطالب: ${currentUser.name} [نافس]`;
-                document.getElementById('dashboard-title').innerText = "منصة قياس مخرجات اختبار نافس الوطني للطلاب";
-                document.getElementById('stat-label-count').innerText = "اختبارات نافس المنفذة";
-                document.getElementById('hub-welcome-title').innerText = "محاكي اختبار نافس الوطني الرسمي";
-                document.getElementById('hub-welcome-desc').innerText = "يحتوي الاختبار على 30 سؤالاً فريداً وحقيقياً بالكامل يتجدد عشوائياً في كل محاولة: 10 أسئلة لغة عربية ونقد، 10 رياضيات وحل مشكلات، 10 علوم واستقصاء تجريبي.";
-            } else {
-                document.getElementById('welcome-msg').innerText = `المعلم: ${currentUser.name} [الرخصة المهنية]`;
-                document.getElementById('dashboard-title').innerText = "بوابة رصد كفايات الرخصة المهنية للمعلمين";
-                document.getElementById('stat-label-count').innerText = "اختبارات الرخصة المنفذة";
-                document.getElementById('hub-welcome-title').innerText = "محاكي اختبار الرخصة المهنية التربوية المعتمد";
-                document.getElementById('hub-welcome-desc').innerText = "يحتوي هذا الاختبار المعياري على 30 سؤالاً متغيراً ومختاراً عشوائياً في كل مرة من بنك الأسئلة المطور لقياس مستواك التربوي والمهني بدقة.";
-            }
-            
-            switchPage('dashboard');
-        }
-
-        function logout() {
-            localStorage.removeItem('sultan_official_user_v2');
-            location.reload();
-        }
-
-        function switchPage(pageId) {
-            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
-            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active-page');
-            const targetLink = document.getElementById('nav-' + pageId);
-            if(targetLink) targetLink.classList.add('active');
-
-            if(pageId === 'dashboard') renderDashboardDataAndCharts();
-        }
-
-        // دالة مساعدة لخلط المصفوفة عشوائياً واختيار عدد محدد منها
-        function getRandomSubset(arr, count) {
-            let shuffled = [...arr].sort(() => Math.random() - 0.5);
-            return shuffled.slice(0, count);
-        }
-
-        // بناء مجموعة أسئلة ديناميكية ومخلطة بالكامل لكل محاولة
-        function buildDynamicQuestionSet(role) {
-            let finalSet = [];
-            if(role === "طالب") {
-                // اختيار 10 أسئلة عشوائية من أقسام اللغة العربية، الرياضيات، والعلوم
-                const selectedArabic = getRandomSubset(NAFAS_ARABIC_BANK, 10);
-                const selectedMath = getRandomSubset(NAFAS_MATH_BANK, 10);
-                const selectedScience = getRandomSubset(NAFAS_SCIENCE_BANK, 10);
-
-                selectedArabic.forEach(q => {
-                    finalSet.push({ q: q.q, opts: [q.c, ...q.w].sort(() => Math.random() - 0.5), correctText: q.c, reason: q.r, type: "اللغة العربية", bClass: "badge-ar" });
-                });
-                selectedMath.forEach(q => {
-                    finalSet.push({ q: q.q, opts: [q.c, ...q.w].sort(() => Math.random() - 0.5), correctText: q.c, reason: q.r, type: "الرياضيات", bClass: "badge-math" });
-                });
-                selectedScience.forEach(q => {
-                    finalSet.push({ q: q.q, opts: [q.c, ...q.w].sort(() => Math.random() - 0.5), correctText: q.c, reason: q.r, type: "العلوم العامة", bClass: "badge-sci" });
-                });
-            } else {
-                // اختيار 30 سؤالاً عشوائياً من بنك أسئلة الرخصة المهنية الممتد (40 سؤالاً)
-                const selectedEdu = getRandomSubset(PROFESSIONAL_EDU_BANK, 30);
-                selectedEdu.forEach(q => {
-                    finalSet.push({ q: q.q, opts: [q.c, ...q.w].sort(() => Math.random() - 0.5), correctText: q.c, reason: q.r, type: "الكفايات التربوية العامة", bClass: "badge-edu" });
-                });
-            }
-            return finalSet;
-        }
-
-        function initiateSegregatedQuiz() {
-            currentQuestions = buildDynamicQuestionSet(currentUser.role);
-            currentQuestionIndex = 0;
-
-            document.getElementById('setup-quiz-zone').style.display = 'none';
-            document.getElementById('active-quiz-container').style.display = 'block';
-            document.getElementById('feedback-result-container').style.display = 'none';
-            document.getElementById('quiz-header-title').innerText = currentUser.role === "طالب" ? "نموذج اختبار نافس الوطني (30 فقرة متجددة وعشوائية)" : "نموذج كفايات الرخصة المهنية (30 بنداً متغيراً في كل محاولة)";
-
-            renderQuestionCard();
-            syncSidebarMap();
-            refreshProgressBar();
-            triggerClockTimer(1800); 
-        }
-
-        function renderQuestionCard() {
-            const qObj = currentQuestions[currentQuestionIndex];
-            const badge = document.getElementById('subject-badge');
-            badge.innerText = qObj.type;
-            badge.className = `badge ${qObj.bClass}`;
-            
-            document.getElementById('current-question-title').innerText = qObj.q;
-            
-            const block = document.getElementById('options-block');
-            block.innerHTML = '';
-
-            if (qObj.pickedOption !== undefined) {
-                block.classList.add('locked');
-            } else {
-                block.classList.remove('locked');
-            }
-
-            qObj.opts.forEach(opt => {
-                let isSelected = qObj.pickedOption === opt ? 'selected' : '';
-                block.innerHTML += `
-                    <div class="option-box ${isSelected}" onclick="commitChoice('${opt}')">
-                        <i class="fa-regular ${isSelected ? 'fa-circle-check':'fa-circle'}"></i> ${opt}
-                    </div>
-                `;
-            });
-
-            const feedbackBlock = document.getElementById('instant-feedback-block');
-            if(qObj.pickedOption !== undefined) {
-                let isCorrect = qObj.pickedOption === qObj.correctText;
-                feedbackBlock.innerHTML = `
-                    <div class="instant-feedback ${isCorrect ? 'correct' : 'wrong'}">
-                        <strong>${isCorrect ? '💡 إجابة صحيحة متميزة!' : '❌ إجابة خاطئة (تم تسجيل خيارك)'}</strong><br>
-                        ${!isCorrect ? `<span>الإجابة النموذجية: <b>${qObj.correctText}</b></span><br>` : ''}
-                        <strong>التفنيد العلمي:</strong> ${qObj.reason}
-                    </div>
-                `;
-            } else {
-                feedbackBlock.innerHTML = '';
-            }
-
-            document.querySelectorAll('.map-btn').forEach((btn, index) => {
-                btn.classList.remove('current');
-                if(index === currentQuestionIndex) btn.classList.add('current');
-            });
-        }
-
-        function commitChoice(optionText) {
-            if (currentQuestions[currentQuestionIndex].pickedOption !== undefined) {
-                return; 
-            }
-
-            currentQuestions[currentQuestionIndex].pickedOption = optionText;
-            renderQuestionCard();
-            syncSidebarMap();
-            refreshProgressBar();
-        }
-
-        function syncSidebarMap() {
-            const grid = document.getElementById('map-buttons-grid');
-            grid.innerHTML = '';
-            currentQuestions.forEach((q, idx) => {
-                let stateClass = q.pickedOption !== undefined ? 'answered' : '';
-                if(idx === currentQuestionIndex) stateClass += ' current';
-                grid.innerHTML += `<div class="map-btn ${stateClass}" onclick="jumpTo(${idx})">${idx + 1}</div>`;
-            });
-        }
-
-        function jumpTo(idx) {
-            currentQuestionIndex = idx;
-            renderQuestionCard();
-        }
-
-        function stepQuestion(direction) {
-            let next = currentQuestionIndex + direction;
-            if(next >= 0 && next < currentQuestions.length) {
-                currentQuestionIndex = next;
-                renderQuestionCard();
-            }
-        }
-
-        function refreshProgressBar() {
-            let done = currentQuestions.filter(q => q.pickedOption !== undefined).length;
-            document.getElementById('quiz-progress-bar').style.width = Math.round((done / 30) * 100) + "%";
-        }
-
-        function triggerClockTimer(seconds) {
-            let rem = seconds;
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                let m = Math.floor(rem / 60);
-                let s = rem % 60;
-                document.getElementById('quiz-clock').innerText = `${m < 10 ? '0'+m:m}:${s < 10 ? '0'+s:s}`;
-                if(--rem < 0) {
-                    clearInterval(timerInterval);
-                    alert("انتهى وقت الفحص الزمني النظامي! جاري تصحيح الإجابات ورصد ناتج المحاولة فوراً.");
-                    endQuizAndCompileResults();
-                }
-            }, 1000);
-        }
-
-        function endQuizAndCompileResults() {
-            clearInterval(timerInterval);
-            let correctCount = 0;
-            const zone = document.getElementById('detailed-feedback-zone');
-            zone.innerHTML = '';
-
-            currentQuestions.forEach((q, idx) => {
-                let isCorrect = q.pickedOption === q.correctText;
-                if(isCorrect) correctCount++;
-
-                zone.innerHTML += `
-                    <div class="feedback-item ${isCorrect ? 'feedback-correct':'feedback-wrong'}">
-                        <span class="badge ${q.bClass}">${q.type}</span>
-                        <p><strong>س ${idx + 1}: ${q.q}</strong></p>
-                        <p style="margin-top:4px;">إجابتك المحفوظة: <span style="font-weight:700;">${q.pickedOption || 'لم يتم اختيار إجابة'}</span> ${isCorrect ? ' <i class="fa-solid fa-circle-check" style="color:var(--success-color)"></i>':' <i class="fa-solid fa-circle-xmark" style="color:var(--danger-color)"></i>'}</p>
-                        ${!isCorrect ? `<p>الإجابة النموذجية المعتمدة: <strong style="color:var(--success-color)">${q.correctText}</strong></p>`:''}
-                        <p style="font-size:13px; margin-top:6px; color:var(--primary-dark); background:rgba(0,0,0,0.02); padding:8px; border-radius:6px;"><i class="fa-solid fa-circle-info"></i> <strong>التفنيد والتوجيه العلمي لهيئة التقويم:</strong> ${q.reason}</p>
-                    </div>
-                `;
-            });
-
-            let pct = Math.round((correctCount / 30) * 100);
-            let labelTitle = currentUser.role === "طالب" ? "اختبار نافس الشامل للطلاب" : "اختبار الرخصة المهنية التربوية";
-            document.getElementById('score-summary-zone').innerText = `مستوى التمكن العام: ${pct}% (تم حل ${correctCount} فقرة حلاً صحيحاً ومطابقاً للمعايير من أصل 30 سؤال)`;
-            
-            document.getElementById('active-quiz-container').style.display = 'none';
-            document.getElementById('feedback-result-container').style.display = 'block';
-            document.getElementById('setup-quiz-zone').style.display = 'block';
-
-            saveResultRecord(labelTitle, pct, `${correctCount}/30`);
-
-            lastReport = {
-                topic: labelTitle,
-                scoreStr: `${pct}% (${correctCount}/30)`,
-                dateStr: new Date().toLocaleString('ar-SA'),
-                feedbackHtml: zone.innerHTML
-            };
-        }
-
-        function saveResultRecord(topic, pct, scoreStr) {
-            let key = `sultan_official_history_v2_${currentUser.name}`;
-            let data = localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : [];
-            data.push({ topic: topic, date: new Date().toLocaleString('ar-SA'), pct: pct, scoreStr: scoreStr });
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-
-        function renderDashboardDataAndCharts() {
-            let key = `sultan_official_history_v2_${currentUser.name}`;
-            let history = localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : [];
-            
-            document.getElementById('stat-total-quizzes').innerText = history.length;
-            let avg = 0;
-            if(history.length > 0) {
-                avg = Math.round(history.reduce((sum, item) => sum + item.pct, 0) / history.length);
-            }
-            document.getElementById('stat-avg-score').innerText = avg + "%";
-
-            const tbody = document.getElementById('history-table-body');
-            tbody.innerHTML = history.length === 0 ? `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding: 30px 0;">لا يوجد محاولات سابقة مسجلة في هذا المسار حالياً. توجه إلى بوابة الاختبارات لبناء مصفوفتك الأولى.</td></tr>` : '';
-            
-            let scoresArray = [];
-            let labelsArray = [];
-
-            [...history].reverse().forEach((item, index) => {
-                scoresArray.push(item.pct);
-                labelsArray.push(`المحاولة ${index + 1}`);
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${item.topic}</strong></td>
-                        <td>${item.date}</td>
-                        <td><span style="color:${item.pct >= 70 ? 'var(--success-color)':'var(--danger-color)'}; font-weight:bold;">${item.pct}%</span></td>
-                        <td>${item.scoreStr}</td>
-                        <td><button class="btn-action" style="padding:4px 12px; font-size:11px;" onclick="switchPage('quiz-hub')">مراجعة البنود</button></td>
-                    </tr>
-                `;
-            });
-
-            if(skillsChartInstance) skillsChartInstance.destroy();
-            if(timelineChartInstance) timelineChartInstance.destroy();
-
-            const ctxSkills = document.getElementById('skillsChart').getContext('2d');
-            skillsChartInstance = new Chart(ctxSkills, {
-                type: 'radar',
-                data: {
-                    labels: ['الاستدلال الاستقرائي', 'حل المشكلات المعقدة', 'التحليل والاستنتاج الأدبي', 'النقد والتقويم المتكامل', 'إدارة زمن الفحص والمعاينة'],
-                    datasets: [{
-                        label: 'مستواك المعياري (%)',
-                        data: history.length > 0 ? [avg, avg + 5, avg - 2, avg + 3, 85] : [0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                        borderColor: '#28a745',
-                        borderWidth: 2
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
-            timelineChartInstance = new Chart(ctxTimeline, {
-                type: 'line',
-                data: {
-                    labels: labelsArray.length > 0 ? labelsArray : ['بدء التسجيل للمسار'],
-                    datasets: [{
-                        label: 'مؤشر صعود الكفاءة التراكمي',
-                        data: scoresArray.length > 0 ? scoresArray : [0],
-                        borderColor: '#1d5cb4',
-                        backgroundColor: 'rgba(29, 92, 180, 0.04)',
-                        tension: 0.25,
-                        fill: true
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function invokePortfolioPrinting() {
-            if(!lastReport.topic) return;
-            document.getElementById('print-name').innerText = currentUser.name;
-            document.getElementById('print-role').innerText = currentUser.role === "طالب" ? "طالب / مستفيد من نماذج نافس الوطنية" : "معلم / مرشح لاختبار كفايات الرخصة المهنية";
-            document.getElementById('print-topic').innerText = lastReport.topic;
-            document.getElementById('print-score').innerText = lastReport.scoreStr;
-            document.getElementById('print-date').innerText = lastReport.dateStr;
-            document.getElementById('print-details').innerHTML = lastReport.feedbackHtml;
-            window.print();
-        }
-    </script>
-</body>
-</html>
+            # زر تحميل الشهادة
+            st.download_button(
+                label="📥 تحميل شهادة الإنجاز الخاصة بك",
+                data=cert_bytes,
+                file_name=f"Certificate_{user_name}.png",
+                mime="image/png"
+            )
+        else:
+            st.error(f"نسبتك {st.session_state.percentage:.1f}%. تحتاج إلى 70% أو أكثر للحصول على الشهادة. حاول مرة أخرى!")
+            if st.button("🔄 حاول مرة أخرى بأسئلة جديدة"):
+                st.session_state.current_domain = None # لتنظيف الجلسة وتوليد أسئلة جديدة
+                st.rerun()
+else:
+    st.info("💡 يرجى كتابة اسمك أولاً للبدء في الاختبار واصدار الشهادة عند النجاح.")
