@@ -1,125 +1,294 @@
-import streamlit as st
-import random
-from PIL import Image, ImageDraw, ImageFont
-import io
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الاختبارات التفاعلي والشهادات الذكية</title>
+    <!-- استدعاء خط Cairo وتنسيقات Tailwind CSS المودرن -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4 md:p-8">
 
-# 1. مكتبة الأسئلة الكبيرة (مقسمة حسب المجالات)
-# يمكنك توسيع هذه المكتبة بإضافة مئات الأسئلة بنفس النمط
-QUESTIONS_BANK = {
-    "علم البيانات والذكاء الاصطناعي": [
-        {"question": "ما هي المكتبة الأساسية لتلاعب بالبيانات في بايثون؟", "options": ["Pandas", "NumPy", "Scikit-Learn", "Matplotlib"], "answer": "Pandas"},
-        {"question": "أي من الخوارزميات التالية يعتبر من خوارزميات التعلم الخاضع للإشراف (Supervised)؟", "options": ["K-Means", "Linear Regression", "PCA", "DBSCAN"], "answer": "Linear Regression"},
-        {"question": "ما هو الهدف الرئيسي من عملية الـ Overfitting في النماذج؟", "options": ["حفظ البيانات بدقة عالية وفشل التعميم", "تحسين الأداء على بيانات جديدة", "تقليل وقت التدريب", "تنظيف البيانات"], "answer": "حفظ البيانات بدقة عالية وفشل التعميم"},
-        {"question": "ما الدالة المستخدمة لتحويل البيانات النصية إلى متجهات رقمية؟", "options": ["TF-IDF", "Dropna", "Groupby", "Describe"], "answer": "TF-IDF"},
-        {"question": "أي مكتبة تستخدم بشكل واسع لبناء الشبكات العصبية العميقة؟", "options": ["TensorFlow", "OpenCV", "Requests", "BeautifulSoup"], "answer": "TensorFlow"}
-    ],
-    "تحليل البيانات وإكسل": [
-        {"question": "أي دالة في إكسل تستخدم للبحث العمودي عن القيم؟", "options": ["VLOOKUP", "HLOOKUP", "INDEX", "MATCH"], "answer": "VLOOKUP"},
-        {"question": "ما هي الأداة الأفضل في إكسل لتلخيص وتحليل الجداول الضخمة بنقرات بسيطة؟", "options": ["Pivot Tables", "Conditional Formatting", "Data Validation", "What-If Analysis"], "answer": "Pivot Tables"},
-        {"question": "ماذا تعني الصيغة $A$1 في إكسل؟", "options": ["مرجع مطلق للخلية", "مرجع نسبي للخلية", "خطأ في الصيغة", "اسم نطاق"], "answer": "مرجع مطلق للخلية"},
-        {"question": "أي دالة تستخدم لحساب عدد الخلايا التي تحتوي على أرقام فقط؟", "options": ["COUNT", "COUNTA", "COUNTBLANK", "COUNTIF"], "answer": "COUNT"},
-        {"question": "لتطبيق تنسيق تلقائي بناءً على شرط معين، نستخدم:", "options": ["التنسيق الشرطي", "الفرز والتصفية", "التحقق من صحة البيانات", "دمج المراسلات"], "answer": "التنسيق الشرطي"}
-    ]
-}
-
-# 2. دالة توليد شهادة الإنجاز تلقائياً كصورة
-def generate_certificate(name, domain):
-    # إنشاء صورة بيضاء كخلفية للشهادة (أبعاد الشاشة القياسية للشهادات)
-    img = Image.new('RGB', (800, 600), color='#F4F6F9')
-    draw = ImageDraw.Draw(img)
-    
-    # رسم إطار جمالي
-    draw.rectangle([(20, 20), (780, 580)], outline="#1E3A8A", width=10)
-    draw.rectangle([(30, 30), (770, 570)], outline="#D97706", width=3)
-
-    # كتابة النصوص (ملاحظة: لدعم العربية بشكل كامل في الأنظمة المحلية قد تحتاج لتمرير خط يدعم العربية مثل Arial)
-    try:
-        font_title = ImageFont.truetype("arial.ttf", 40)
-        font_body = ImageFont.truetype("arial.ttf", 24)
-        font_sub = ImageFont.truetype("arial.ttf", 18)
-    except IOError:
-        font_title = ImageFont.load_default()
-        font_body = ImageFont.load_default()
-        font_sub = ImageFont.load_default()
-
-    # نصوص الشهادة (تم عكس النص أو تنسيقه ليظهر بشكل مناسب حسب المكتبة المستخدمة)
-    draw.text((400, 100), "شـهـادة إنـجـاز", fill="#1E3A8A", font=font_title, anchor="mm")
-    draw.text((400, 200), "يتقدم نظام الاختبارات الذكي بتهنئة", fill="#333333", font=font_body, anchor="mm")
-    draw.text((400, 270), f"المتدرب/ة: {name}", fill="#D97706", font=font_title, anchor="mm")
-    draw.text((400, 350), f"لاجتيازه بنجاح الاختبار التقييمي في مجال:", fill="#333333", font=font_body, anchor="mm")
-    draw.text((400, 410), f"[{domain}]", fill="#1E3A8A", font=font_body, anchor="mm")
-    draw.text((400, 500), "تهانينا لك هذا التميز المتواصل!", fill="#059669", font=font_sub, anchor="mm")
-
-    # حفظ الصورة في الذاكرة لإتاحة تحميلها
-    img_byte_arr = io.BytesIO()
-    img.save(img_byte_arr, format='PNG')
-    return img_byte_arr.getvalue()
-
-# 3. واجهة المستخدم (Streamlit App)
-st.set_page_config(page_title="نظام الاختبارات الذكي", page_icon="🎓", layout="centered")
-st.title("🎓 نظام الاختبارات التفاعلي والمكتبة الذكية")
-st.write("اختبر مهاراتك؛ تتغير الأسئلة تلقائياً عند كل دخول لتحصل على تجربة جديدة دائماً!")
-
-# إدخال بيانات المستخدم
-user_name = st.text_input("الرجاء إدخال اسمك الثلاثي لإصدار الشهادة:", value="")
-domain_selected = st.selectbox("اختر مجال الاختبار:", list(QUESTIONS_BANK.keys()))
-
-# إعادة تعيين الأسئلة عند تغيير المجال أو الضغط على زر إعادة التعيين
-if "current_domain" not in st.session_state or st.session_state.current_domain != domain_selected:
-    st.session_state.current_domain = domain_selected
-    # اختيار 3 أسئلة عشوائية من المكتبة الكبيرة عند كل دخول/تغيير
-    st.session_state.selected_questions = random.sample(QUESTIONS_BANK[domain_selected], k=min(3, len(QUESTIONS_BANK[domain_selected])))
-    st.session_state.quiz_submitted = False
-
-# عرض الاختبار
-if user_name:
-    st.subheader(f"📋 اختبار مجال: {domain_selected}")
-    
-    user_answers = {}
-    for i, q in enumerate(st.session_state.selected_questions):
-        st.markdown(f"**س{i+1}: {q['question']}**")
-        # خلط الخيارات لضمان العشوائية الكاملة في كل مرة
-        options = q['options']
-        user_answers[i] = st.radio(f"اختر الإجابة الصحيحة لـ س{i+1}:", options, key=f"q_{i}")
-        st.write("---")
-
-    # زر إرسال الإجابات
-    if st.button("إرسال الإجابات وإنهاء الاختبار"):
-        score = 0
-        for i, q in enumerate(st.session_state.selected_questions):
-            if user_answers[i] == q['answer']:
-                score += 1
+    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-slate-100 p-6 md:p-8 transition-all duration-300">
         
-        total_q = len(st.session_state.selected_questions)
-        success_percentage = (score / total_q) * 100
-        
-        st.session_state.quiz_submitted = True
-        st.session_state.score = score
-        st.session_state.percentage = success_percentage
+        <!-- الهيدر -->
+        <div class="text-center mb-8">
+            <span class="text-4xl">🎓</span>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 mt-2">نظام الاختبارات الذكي</h1>
+            <p class="text-slate-500 text-sm mt-1">تتغير الأسئلة عشوائياً عند كل دخول لتحصل على شهادة إنجاز فورية!</p>
+        </div>
 
-    # عرض النتيجة والشهادة
-    if st.session_state.get('quiz_submitted', False):
-        st.metric(label="درجتك النهائية", value=f"{st.session_state.score} من {len(st.session_state.selected_questions)}")
-        
-        if st.session_state.percentage >= 70:
-            st.success(f"مبروك! لقد اجتزت الاختبار بنسبة {st.session_state.percentage:.1f}% 🎉")
+        <!-- الخطوة 1: التسجيل واختيار المجال -->
+        <div id="setup-step" class="space-y-6">
+            <div>
+                <label class="block text-slate-700 font-bold mb-2">الاسم الثلاثي (لإصدار الشهادة):</label>
+                <input type="text" id="username" placeholder="اكتب اسمك هنا..." 
+                       class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
+            </div>
+
+            <div>
+                <label class="block text-slate-700 font-bold mb-2">اختر مجال الاختبار:</label>
+                <select id="domain-select" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-right bg-white">
+                    <option value="data_science">علم البيانات والذكاء الاصطناعي</option>
+                    <option value="excel_analysis">تحليل البيانات وإكسل</option>
+                </select>
+            </div>
+
+            <button onclick="startQuiz()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg transition-colors duration-200">
+                ابدأ الاختبار الآن 🚀
+            </button>
+        </div>
+
+        <!-- الخطوة 2: عرض الأسئلة -->
+        <div id="quiz-step" class="hidden space-y-6">
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <span id="quiz-domain-title" class="font-bold text-blue-600 text-lg"></span>
+                <span class="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1 rounded-full">توليد عشوائي نشط</span>
+            </div>
             
-            # توليد الشهادة
-            cert_bytes = generate_certificate(user_name, domain_selected)
+            <div id="questions-container" class="space-y-6">
+                <!-- سيتم ملء الأسئلة بالـ JS -->
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="submitQuiz()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-lg transition-colors duration-200">
+                    إنهاء وإرسال الإجابات ✅
+                </button>
+                <button onclick="resetSetup()" class="px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-3.5 rounded-lg transition-colors duration-200">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+
+        <!-- الخطوة 3: النتيجة والشهادة -->
+        <div id="result-step" class="hidden space-y-6 text-center">
+            <h2 class="text-2xl font-bold text-slate-800">نتيجة الاختبار التقييمي</h2>
+            <div class="inline-block bg-slate-100 px-6 py-4 rounded-xl mb-4">
+                <p class="text-sm text-slate-500">الدرجة النهائية</p>
+                <p id="score-text" class="text-4xl font-extrabold text-blue-600 mt-1">0 / 3</p>
+            </div>
+
+            <div id="feedback-msg" class="p-4 rounded-lg font-semibold text-lg"></div>
+
+            <!-- عرض الشهادة التفاعلية عند النجاح -->
+            <div id="certificate-box" class="hidden space-y-4">
+                <p class="text-sm text-slate-500">تم توليد شهادتك بنجاح! يمكنك معاينتها وتحميلها بالأسفل:</p>
+                <div class="border rounded-xl overflow-hidden shadow-inner bg-slate-100 flex justify-center p-2">
+                    <canvas id="certCanvas" width="800" height="600" class="max-w-full h-auto border shadow-md rounded-lg"></canvas>
+                </div>
+                <button onclick="downloadCertificate()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                    <span>📥 تحميل شهادة الإنجاز الخاصة بك</span>
+                </button>
+            </div>
+
+            <button onclick="resetSetup()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg transition-colors duration-200">
+                🔄 حاول مجدداً بأسئلة جديدة
+            </button>
+        </div>
+
+    </div>
+
+    <!-- كود الجافا سكريبت التفاعلي -->
+    <script>
+        // 1. بنية الأسئلة الكبيرة (مقسمة لكل مجال)
+        const QUESTIONS_BANK = {
+            data_science: [
+                { question: "ما هي المكتبة الأساسية لتلاعب بالبيانات وتجهيزها في لغة بايثون؟", options: ["Pandas", "NumPy", "Scikit-Learn", "Matplotlib"], answer: "Pandas" },
+                { question: "أي من الخوارزميات التالية يعتبر من خوارزميات التعلم الخاضع للإشراف (Supervised)؟", options: ["K-Means", "Linear Regression", "PCA", "DBSCAN"], answer: "Linear Regression" },
+                { question: "ما هو الهدف الرئيسي من عملية الـ Overfitting في النماذج؟", options: ["حفظ البيانات بدقة عالية وفشل التعميم", "تحسين الأداء على بيانات جديدة", "تقليل وقت التدريب", "تنظيف البيانات"], answer: "حفظ البيانات بدقة عالية وفشل التعميم" },
+                { question: "ما الدالة المستخدمة لتحويل البيانات النصية إلى متجهات رقمية؟", options: ["TF-IDF", "Dropna", "Groupby", "Describe"], answer: "TF-IDF" },
+                { question: "أي مكتبة تستخدم بشكل واسع لبناء وتصميم الشبكات العصبية العميقة؟", options: ["TensorFlow", "OpenCV", "Requests", "BeautifulSoup"], answer: "TensorFlow" }
+            ],
+            excel_analysis: [
+                { question: "أي دالة في إكسل تستخدم للبحث العمودي عن قيم معينة؟", options: ["VLOOKUP", "HLOOKUP", "INDEX", "MATCH"], answer: "VLOOKUP" },
+                { question: "ما هي الأداة الأفضل في إكسل لتلخيص وتحليل الجداول الضخمة بنقرات بسيطة؟", options: ["Pivot Tables", "Conditional Formatting", "Data Validation", "What-If Analysis"], answer: "Pivot Tables" },
+                { question: "ماذا تعني الصيغة $A$1 المثبتة برموز الدولار في إكسل؟", options: ["مرجع مطلق للخلية", "مرجع نسبي للخلية", "خطأ في الصيغة", "اسم نطاق محدد"], answer: "مرجع مطلق للخلية" },
+                { question: "أي دالة تستخدم لحساب عدد الخلايا التي تحتوي على أرقام فقط ضمن نطاق؟", options: ["COUNT", "COUNTA", "COUNTBLANK", "COUNTIF"], answer: "COUNT" },
+                { question: "لتطبيق تنسيق تلقائي (مثل تلوين الخلايا) بناءً على شرط محدد، نستخدم:", options: ["التنسيق الشرطي", "الفرز والتصفية", "التحقق من صحة البيانات", "دمج المراسلات"], answer: "التنسيق الشرطي" }
+            ]
+        };
+
+        let currentQuestions = [];
+        let userName = "";
+        let selectedDomainText = "";
+
+        // بدء الاختبار
+        function startQuiz() {
+            userName = document.getElementById("username").value.trim();
+            const domain = document.getElementById("domain-select").value;
+            selectedDomainText = document.getElementById("domain-select").options[document.getElementById("domain-select").selectedIndex].text;
+
+            if (!userName) {
+                alert("يرجى إدخال اسمك الثلاثي لتهيئة وإنشاء شهادتك بشكل صحيح!");
+                return;
+            }
+
+            // اختيار 3 أسئلة عشوائية من مكتبة المجال المحدد
+            const allQuestions = [...QUESTIONS_BANK[domain]];
+            currentQuestions = shuffleArray(allQuestions).slice(0, 3);
+
+            // عرض وحقن الأسئلة في الصفحة
+            document.getElementById("quiz-domain-title").innerText = selectedDomainText;
+            const container = document.getElementById("questions-container");
+            container.innerHTML = "";
+
+            currentQuestions.forEach((q, qIndex) => {
+                let optionsHTML = "";
+                // لزيادة العشوائية نقوم بخلط الخيارات أيضاً داخل السؤال
+                const shuffledOptions = shuffleArray([...q.options]);
+                
+                shuffledOptions.forEach((option) => {
+                    optionsHTML += `
+                        <label class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+                            <input type="radio" name="question-${qIndex}" value="${option}" class="w-4 h-4 text-blue-600">
+                            <span class="text-slate-700 text-sm font-medium">${option}</span>
+                        </label>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="bg-slate-50/50 p-5 rounded-xl border border-slate-100 space-y-3">
+                        <p class="font-bold text-slate-800 text-base">س ${qIndex + 1}: ${q.question}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            ${optionsHTML}
+                        </div>
+                    </div>
+                `;
+            });
+
+            // تحريك الشاشات
+            document.getElementById("setup-step").classList.add("hidden");
+            document.getElementById("quiz-step").classList.remove("hidden");
+        }
+
+        // إرسال وتصحيح الإجابات
+        function submitQuiz() {
+            let score = 0;
+            let answeredAll = true;
+
+            currentQuestions.forEach((q, qIndex) => {
+                const selected = document.querySelector(`input[name="question-${qIndex}"]:checked`);
+                if (!selected) {
+                    answeredAll = false;
+                } else if (selected.value === q.answer) {
+                    score++;
+                }
+            });
+
+            if (!answeredAll) {
+                alert("يرجى الإجابة على جميع الأسئلة المعروضة قبل الإرسال!");
+                return;
+            }
+
+            const percentage = (score / currentQuestions.length) * 100;
             
-            st.image(cert_bytes, caption="معاينة شهادتك", use_container_width=True)
+            document.getElementById("score-text").innerText = `${score} من ${currentQuestions.length}`;
+            const feedbackMsg = document.getElementById("feedback-msg");
+            const certificateBox = document.getElementById("certificate-box");
+
+            if (percentage >= 70) {
+                feedbackMsg.innerText = `مبروك! لقد اجتزت الاختبار بنسبة نجاح ممتازة بلغت ${percentage.toFixed(0)}% 🎉`;
+                feedbackMsg.className = "p-4 rounded-lg font-semibold text-lg bg-emerald-50 text-emerald-700";
+                certificateBox.classList.remove("hidden");
+                // توليد الشهادة على الكانفاس
+                drawCertificate(userName, selectedDomainText);
+            } else {
+                feedbackMsg.innerText = `للأسف حصلت على نسبة ${percentage.toFixed(0)}%. يرجى المحاولة والحصول على 70% أو أكثر لتوليد الشهادة.`;
+                feedbackMsg.className = "p-4 rounded-lg font-semibold text-lg bg-red-50 text-red-700";
+                certificateBox.classList.add("hidden");
+            }
+
+            document.getElementById("quiz-step").classList.add("hidden");
+            document.getElementById("result-step").classList.remove("hidden");
+        }
+
+        // رسم الشهادة باستخدام Canvas (يدعم اللغة العربية تلقائياً في المتصفحات الحديثة)
+        function drawCertificate(name, domain) {
+            const canvas = document.getElementById("certCanvas");
+            const ctx = canvas.getContext("2d");
+
+            // 1. رسم الخلفية
+            ctx.fillStyle = "#F8FAFC";
+            ctx.fillRect(0, 0, 800, 600);
+
+            // 2. إطار خارجي أنيق
+            ctx.lineWidth = 12;
+            ctx.strokeStyle = "#1E3A8A"; // كحلي
+            ctx.strokeRect(20, 20, 760, 560);
+
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#D97706"; // ذهبي
+            ctx.strokeRect(32, 32, 736, 536);
+
+            // 3. تنسيق النصوص العربية ومحاذاتها بالمنتصف
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            // العنوان الرئيسي
+            ctx.font = "bold 44px 'Cairo', 'Arial'";
+            ctx.fillStyle = "#1E3A8A";
+            ctx.fillText("شـهـادة إنـجـاز وتـقـديـر", 400, 110);
+
+            // السطر الفرعي
+            ctx.font = "20px 'Cairo', 'Arial'";
+            ctx.fillStyle = "#475569";
+            ctx.fillText("يشهد نظام التقييم والاختبارات الذكي بنجاح وتفوق المتدرب/ة", 400, 210);
+
+            // اسم المتدرب
+            ctx.font = "bold 34px 'Cairo', 'Arial'";
+            ctx.fillStyle = "#D97706";
+            ctx.fillText(name, 400, 285);
+
+            // تفاصيل المجال
+            ctx.font = "20px 'Cairo', 'Arial'";
+            ctx.fillStyle = "#475569";
+            ctx.fillText("وذلك بعد اجتيازه الاختبار والتقييم الفوري بجدارة في مجال:", 400, 360);
+
+            // اسم المجال
+            ctx.font = "bold 24px 'Cairo', 'Arial'";
+            ctx.fillStyle = "#1E3A8A";
+            ctx.fillText(`[ ${domain} ]`, 400, 420);
+
+            // التوقيع أو التهنئة
+            ctx.font = "italic 16px 'Cairo', 'Arial'";
+            ctx.fillStyle = "#059669";
+            ctx.fillText("نهنئكم بهذا التميز ونتمنى لكم مزيداً من النجاح المستمر", 400, 510);
+        }
+
+        // تحميل الشهادة كملف صورة PNG
+        function downloadCertificate() {
+            const canvas = document.getElementById("certCanvas");
+            const imageURL = canvas.toDataURL("image/png");
             
-            # زر تحميل الشهادة
-            st.download_button(
-                label="📥 تحميل شهادة الإنجاز الخاصة بك",
-                data=cert_bytes,
-                file_name=f"Certificate_{user_name}.png",
-                mime="image/png"
-            )
-        else:
-            st.error(f"نسبتك {st.session_state.percentage:.1f}%. تحتاج إلى 70% أو أكثر للحصول على الشهادة. حاول مرة أخرى!")
-            if st.button("🔄 حاول مرة أخرى بأسئلة جديدة"):
-                st.session_state.current_domain = None # لتنظيف الجلسة وتوليد أسئلة جديدة
-                st.rerun()
-else:
-    st.info("💡 يرجى كتابة اسمك أولاً للبدء في الاختبار واصدار الشهادة عند النجاح.")
+            const link = document.createElement("a");
+            link.href = imageURL;
+            link.download = `شهادة_${userName}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // تصفير وتهيئة الواجهة للبدء من جديد
+        function resetSetup() {
+            document.getElementById("result-step").classList.add("hidden");
+            document.getElementById("quiz-step").classList.add("hidden");
+            document.getElementById("setup-step").classList.remove("hidden");
+        }
+
+        // دالة مساعدة لخلط المصفوفات (عشوائية كاملة)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
