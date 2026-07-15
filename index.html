@@ -3,784 +3,524 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة الأمير سلطان التعليمية - نظام المحاكاة الوطني الرسمي 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <title>منصة التدريب الذكية - النموذجية السابعة</title>
+    <!-- Tailwind CSS & Tailwind Elements -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0B192C',     /* أزرق داكن فخم */
+                            silver: '#E2E8F0',   /* فضي بلاتيني */
+                            accent: '#10B981',   /* أخضر زمردي نيون */
+                            muted: '#1E293B'     /* كحلي وسيط */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --primary-dark: #06405c;
-            --primary-blue: #1d5cb4;
-            --teal-green: #0a7e74;
-            --light-teal: #e8f6f5;
-            --light-blue: #edf4fc;
-            --light-bg: #f4f8fb;
-            --text-color: #333333;
-            --text-muted: #666666;
-            --pure-white: #ffffff;
-            --purple-accent: #5034a4;
-            --danger-color: #e53e3e;
-            --success-color: #28a745; 
-            --light-success: #e8f5e9; 
-            --card-shadow: 0 10px 30px rgba(6, 64, 92, 0.05);
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #050B14;
         }
-
-        body.dark-mode {
-            --light-bg: #0f172a;
-            --pure-white: #1e293b;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary-dark: #38bdf8;
-            --light-blue: #1e293b;
-            --light-teal: #0f172a;
+        /* تأثيرات الإضاءة والوهج النيون */
+        .neon-border {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-        body { background-color: var(--light-bg); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; transition: var(--transition); }
-
-        header { background-color: var(--pure-white); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.03); position: sticky; top: 0; z-index: 1000; }
-        .logo-text h1 { color: var(--primary-dark); font-size: 19px; font-weight: 800; }
-        .logo-text p { color: var(--teal-green); font-size: 12px; font-weight: 500; }
-        
-        nav { display: flex; gap: 25px; align-items: center; }
-        nav a { text-decoration: none; color: var(--text-color); font-weight: 600; font-size: 14px; cursor: pointer; padding: 6px 0; }
-        nav a.active, nav a:hover { color: var(--teal-green); border-bottom: 3px solid var(--teal-green); }
-        
-        .page-content { display: none; flex: 1; padding: 40px 5%; max-width: 1400px; margin: 0 auto; width: 100%; animation: fadeIn 0.3s ease; }
-        .page-content.active-page { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .btn-action { background-color: var(--teal-green); color: white; padding: 12px 28px; border-radius: 25px; border: none; font-weight: 700; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(10, 126, 116, 0.15); }
-        .btn-action:hover { opacity: 0.95; transform: translateY(-2px); }
-        .btn-secondary { background-color: var(--primary-blue); }
-        .btn-purple { background-color: var(--purple-accent); }
-
-        .auth-container { background: var(--pure-white); padding: 40px 30px; border-radius: 20px; box-shadow: var(--card-shadow); max-width: 550px; margin: 60px auto; text-align: center; }
-        .form-group { margin-bottom: 22px; text-align: right; display: flex; flex-direction: column; gap: 8px; }
-        .form-group input, .form-group select { padding: 14px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.08); background: var(--light-bg); color: var(--text-color); font-size: 15px; outline: none; }
-
-        .quiz-layout { display: grid; grid-template-columns: 1fr 340px; gap: 30px; margin-top: 25px; }
-        @media (max-width: 992px) { .quiz-layout { grid-template-columns: 1fr; } }
-        
-        .quiz-card { background: var(--pure-white); padding: 35px; border-radius: 20px; box-shadow: var(--card-shadow); }
-        
-        .option-box { background: rgba(0,0,0,0.01); border: 1px solid rgba(0,0,0,0.06); padding: 16px; border-radius: 12px; cursor: pointer; margin-top: 14px; transition: var(--transition); display: flex; align-items: center; gap: 12px; font-size: 15px; }
-        .option-box:hover { background: rgba(40, 167, 69, 0.03); border-color: var(--success-color); }
-        .option-box.selected { background: var(--light-success); border-color: var(--success-color); font-weight: 700; color: var(--success-color); }
-        
-        .options-container.locked .option-box { pointer-events: none; cursor: not-allowed; opacity: 0.8; }
-        .options-container.locked .option-box:hover { background: rgba(0,0,0,0.01); border-color: rgba(0,0,0,0.06); }
-        .options-container.locked .option-box.selected { background: var(--light-success); border-color: var(--success-color); opacity: 1; }
-
-        .instant-feedback { margin-top: 20px; padding: 15px; border-radius: 10px; border-right: 5px solid; font-size: 14px; line-height: 1.6; animation: fadeIn 0.25s ease; }
-        .instant-feedback.correct { background: #e8f5e9; border-right-color: #28a745; color: #1b5e20; }
-        .instant-feedback.wrong { background: #ffebee; border-right-color: #c62828; color: #b71c1c; }
-
-        .questions-map { background: var(--pure-white); padding: 25px; border-radius: 20px; box-shadow: var(--card-shadow); height: fit-content; position: sticky; top: 100px; }
-        .map-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 18px; }
-        .map-btn { padding: 12px 5px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06); background: var(--light-bg); text-align: center; font-weight: 700; cursor: pointer; font-size: 13px; }
-        .map-btn.answered { background-color: #d1fae5; color: #065f46; border-color: #34d399; }
-        .map-btn.current { background-color: var(--primary-blue); color: white; border-color: var(--primary-blue); }
-
-        .progress-bar-container { background: rgba(0,0,0,0.05); border-radius: 10px; height: 10px; margin-bottom: 25px; overflow: hidden; }
-        .progress-bar-fill { background: linear-gradient(90deg, var(--teal-green), #34d399); height: 100%; width: 0%; }
-
-        .feedback-item { padding: 20px; border-radius: 12px; margin-top: 18px; border-right: 6px solid; background: var(--light-bg); line-height: 1.7; }
-        .feedback-correct { border-right-color: var(--success-color); background: rgba(40, 167, 69, 0.04); }
-        .feedback-wrong { border-right-color: var(--danger-color); background: rgba(229, 62, 62, 0.04); }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-bottom: 35px; }
-        .stat-card { background: var(--pure-white); padding: 25px; border-radius: 16px; box-shadow: var(--card-shadow); text-align: center; }
-        .stat-num { font-size: 32px; font-weight: 900; color: var(--teal-green); margin-bottom: 5px; }
-        
-        .charts-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 30px; }
-        @media (max-width: 768px) { .charts-container { grid-template-columns: 1fr; } }
-        .chart-box { background: var(--pure-white); padding: 25px; border-radius: 16px; box-shadow: var(--card-shadow); min-height: 340px; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: var(--pure-white); border-radius: 12px; overflow: hidden; box-shadow: var(--card-shadow); }
-        th, td { padding: 16px 20px; text-align: right; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 14px; }
-        th { background: rgba(6, 64, 92, 0.03); color: var(--primary-dark); }
-
-        #portfolio-print-zone { display: none; background: #fff; color: #000; padding: 40px; }
-        @media print {
-            body * { display: none; }
-            #portfolio-print-zone, #portfolio-print-zone * { display: block; }
-            #portfolio-print-zone { width: 100%; position: absolute; top: 0; left: 0; }
+        .neon-text {
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
-        footer { background: var(--primary-dark); color: white; text-align: center; padding: 20px; font-size: 13px; margin-top: auto; }
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; margin-bottom: 10px; }
-        .badge-ar { background-color: #d97706; }
-        .badge-math { background-color: #2563eb; }
-        .badge-sci { background-color: #059669; }
-        .badge-edu { background-color: #7c3aed; }
-        .badge-guidance { background-color: #ec4899; }
-        .badge-admin { background-color: #0ea5e9; }
+        .silver-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .platinum-card {
+            background: linear-gradient(145deg, #0f172a, #0b1329);
+            border: 1px solid rgba(226, 232, 240, 0.1);
+        }
     </style>
 </head>
-<body>
+<body class="text-slate-100 min-h-screen flex flex-col justify-between">
 
-    <header>
-        <div class="logo-section">
-            <div class="logo-text">
-                <h1>مجمع الأمير سلطان الابتدائي</h1>
-                <p>نظام التقييم المعياري المطور - بوابة نافس وبوابة الرخصة المهنية</p>
+    <!-- الهيدر العلوي الفخم -->
+    <header class="platinum-card border-b border-slate-800 shadow-2xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <!-- الشعار والهوية -->
+            <div class="flex items-center gap-4">
+                <div class="bg-brand-dark p-3 rounded-xl border border-brand-accent/30 shadow-lg">
+                    <i class="fa-solid fa-graduation-cap text-3xl text-brand-accent"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight silver-gradient">المدرسة النموذجية السابعة</h1>
+                    <p class="text-xs text-brand-accent font-semibold tracking-wider flex items-center gap-1">
+                        <i class="fa-solid fa-star text-[10px]"></i> منصة التدريب والتقييم الذكي - الصف الثالث الابتدائي
+                    </p>
+                </div>
             </div>
-        </div>
-        <nav id="main-nav" style="display: none;">
-            <a id="nav-dashboard" onclick="switchPage('dashboard')">لوحة الإحصائيات الحية</a>
-            <a id="nav-quiz-hub" onclick="switchPage('quiz-hub')">بوابة الاختبارات الفعالة</a>
-            <a id="nav-logout" onclick="logout()" style="color: var(--danger-color)"><i class="fa-solid fa-arrow-right-from-bracket"></i> خروج</a>
-        </nav>
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <span id="welcome-msg" style="font-weight: 700; font-size: 14px; color: var(--primary-dark);"></span>
-            <button onclick="document.body.classList.toggle('dark-mode')" style="background:none; border:none; cursor:pointer; font-size: 18px; color: var(--text-color);"><i class="fa-solid fa-circle-half-stroke"></i></button>
+            
+            <!-- معلومات القائدة والتنقل السريع -->
+            <div class="flex items-center gap-4 bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-800">
+                <div class="text-left sm:text-right">
+                    <p class="text-[10px] text-slate-400">قائدة المدرسة</p>
+                    <p class="text-sm font-bold text-slate-200">أ. سهام عبدالله الزهراني</p>
+                </div>
+                <div class="h-8 w-[1px] bg-slate-700"></div>
+                <div class="text-center bg-brand-accent/10 px-3 py-1 rounded-lg border border-brand-accent/20">
+                    <span class="text-xs font-bold text-brand-accent">الصف الثالث</span>
+                </div>
+            </div>
         </div>
     </header>
 
-    <div id="page-auth" class="page-content active-page">
-        <div class="auth-container">
-            <i class="fa-solid fa-graduation-cap" style="font-size: 45px; color: var(--teal-green); margin-bottom: 20px;"></i>
-            <h2>منصة المحاكاة والقياس والتقويم الموحد</h2>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 25px;">يرجى تحديد مسارك بدقة لفتح النماذج المعتمدة رسمياً لمستواك.</p>
-            <div class="form-group">
-                <label>الاسم الكامل للمختبر:</label>
-                <input type="text" id="auth-name" placeholder="أدخل اسمك الثلاثي">
-            </div>
-            <div class="form-group">
-                <label>المسار التعليمي المستهدف:</label>
-                <select id="auth-role">
-                    <option value="طالب">أنا طالب (اختبار نافس الوطني الشامل - لغة عربية، رياضيات، علوم)</option>
-                    <option value="معلم">أنا معلم (اختبار الرخصة المهنية - المعايير التربوية العامة)</option>
-                    <option value="موجه">أنا موجه طلابي (اختبار الرخصة المهنية - التوجيه والإرشاد الطلابي)</option>
-                    <option value="إدارة">أنا قائد / وكيل مدرسة (اختبار الرخصة المهنية - القيادة والإدارة المدرسية)</option>
-                </select>
-            </div>
-            <button class="btn-action" style="width: 100%; justify-content: center;" onclick="handleLogin()">تحميل المسار ودخول النظام</button>
-        </div>
-    </div>
-
-    <div id="page-dashboard" class="page-content">
-        <h2 id="dashboard-title">تحليل مخرجات ونواتج التعلم</h2>
-        <p style="color: var(--text-muted); margin-bottom: 30px;">لوحة تفاعلية حية تعرض مستوى تمكنك من مهارات التفكير العليا بناءً على معايير هيئة تقويم التعليم والتدريب.</p>
+    <!-- المحتوى الرئيسي للمنصة -->
+    <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
         
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-num" id="stat-total-quizzes">0</div>
-                <div style="font-size: 13px; font-weight: 700; color: var(--text-muted);" id="stat-label-count">الاختبارات المنجزة</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-num" id="stat-avg-score">0%</div>
-                <div style="font-size: 13px; font-weight: 700; color: var(--text-muted);">معدل الإتقان العام للمهارات</div>
-            </div>
-        </div>
-
-        <div class="charts-container">
-            <div class="chart-box">
-                <h4>تحليل مجالات التفكير والكفايات الفردية</h4>
-                <canvas id="skillsChart"></canvas>
-            </div>
-            <div class="chart-box">
-                <h4>منحنى التطور الأكاديمي التراكمي</h4>
-                <canvas id="timelineChart"></canvas>
+        <!-- بطاقة الترحيب والتحفيز -->
+        <div class="platinum-card p-6 rounded-2xl mb-8 relative overflow-hidden shadow-xl border-l-4 border-l-brand-accent">
+            <div class="absolute -right-16 -top-16 w-40 h-40 bg-brand-accent/5 rounded-full blur-3xl"></div>
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <h2 class="text-2xl font-bold mb-2 silver-gradient">أهلاً بك يا بطل المستقبل في قطار التحدي! 🚀</h2>
+                    <p class="text-slate-300 text-sm leading-relaxed max-w-2xl">
+                        يسعدنا انضمامك لمنصتنا المحدثة خصيصاً لطلاب الصف الثالث. هنا ستجد أسئلة ممتعة، واضحة، ومليئة بالرسومات الذكية لمساعدتك على التفوق والتميز الدراسي تحت إشراف نخبة من معلميك وقائدة مدرستنا الفاضلة.
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 bg-brand-dark/50 px-4 py-3 rounded-xl border border-slate-800 self-start md:self-auto">
+                    <i class="fa-solid fa-award text-2xl text-yellow-500 animate-bounce"></i>
+                    <div>
+                        <p class="text-xs text-slate-400">الهدف اليومي</p>
+                        <p class="text-xs font-bold text-slate-200">حل اختبار المادة والتميز بها!</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div style="margin-top: 35px;">
-            <h3>سجل المحاولات المنجزة سابقاً</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>نوع ونظام الاختبار المعياري</th>
-                        <th>التاريخ والوقت</th>
-                        <th>مستوى الإتقان</th>
-                        <th>الفقرات الصحيحة</th>
-                        <th>الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="history-table-body"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="page-quiz-hub" class="page-content">
-        <div id="setup-quiz-zone">
-            <h2 id="hub-welcome-title">خادم توليد البنود المعيارية</h2>
-            <p id="hub-welcome-desc" style="color: var(--text-muted); margin-bottom: 25px;"></p>
-            
-            <div class="form-group" style="max-width: 500px;">
-                <button class="btn-action btn-purple" style="width: 100%; justify-content: center;" onclick="initiateSegregatedQuiz()">بناء مصفوفة الـ 30 فقرة الحقيقية والبدء <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <!-- تبويبات اختيار المواد المجاورة والمنظمة -->
+        <div class="mb-6">
+            <h3 class="text-sm font-bold text-slate-400 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-brand-accent"></i> اختر المادة لتبدأ رحلتك الشيقة:
+            </h3>
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="switchSubject('arabic')" id="btn-arabic" class="subject-btn py-4 px-3 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 border font-bold text-sm bg-slate-900 border-slate-800 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-book-open text-2xl"></i>
+                    <span>اللغة العربية</span>
+                </button>
+                <button onclick="switchSubject('math')" id="btn-math" class="subject-btn py-4 px-3 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 border font-bold text-sm bg-slate-900 border-slate-800 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-calculator text-2xl"></i>
+                    <span>الرياضيات</span>
+                </button>
+                <button onclick="switchSubject('science')" id="btn-science" class="subject-btn py-4 px-3 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 border font-bold text-sm bg-slate-900 border-slate-800 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-flask text-2xl"></i>
+                    <span>العلوم</span>
+                </button>
             </div>
         </div>
 
-        <div id="active-quiz-container" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 id="quiz-header-title" style="color: var(--primary-dark);"></h3>
-                <div style="background: var(--pure-white); padding: 8px 16px; border-radius: 20px; box-shadow: var(--card-shadow); color: var(--danger-color); font-weight: 800;">
-                    <i class="fa-regular fa-clock"></i> المؤقت التنازلي: <span id="quiz-clock">30:00</span>
+        <!-- منطقة الاختبار التفاعلي -->
+        <div id="quiz-container" class="hidden platinum-card rounded-2xl p-6 sm:p-8 shadow-2xl relative">
+            <!-- شريط التقدم -->
+            <div class="flex items-center justify-between mb-6">
+                <span id="question-counter" class="text-xs font-semibold text-brand-accent bg-brand-accent/10 px-3 py-1 rounded-full border border-brand-accent/20"></span>
+                <div class="w-2/3 bg-slate-800 h-2 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-brand-accent h-full transition-all duration-500" style="width: 0%"></div>
                 </div>
             </div>
 
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="quiz-progress-bar"></div>
+            <!-- السؤال -->
+            <div class="mb-8">
+                <div id="question-box" class="text-lg sm:text-xl font-bold text-slate-100 leading-relaxed mb-6"></div>
+                <!-- الخيارات -->
+                <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- تُولد الخيارات برمجياً -->
+                </div>
             </div>
-            
-            <div class="quiz-layout">
-                <div class="quiz-card" id="question-block">
-                    <span id="subject-badge" class="badge"></span>
-                    <h3 id="current-question-title" style="margin-bottom: 25px; line-height: 1.6;"></h3>
-                    
-                    <div id="options-block" class="options-container"></div>
-                    
-                    <div id="instant-feedback-block"></div>
 
-                    <div style="margin-top: 35px; display: flex; justify-content: space-between;">
-                        <button class="btn-action btn-secondary" onclick="stepQuestion(-1)"><i class="fa-solid fa-arrow-right"></i> السابق</button>
-                        <button class="btn-action btn-secondary" onclick="stepQuestion(1)">التالي <i class="fa-solid fa-arrow-left"></i></button>
+            <!-- أزرار التحكم -->
+            <div class="flex justify-between items-center border-t border-slate-800 pt-6">
+                <button id="prev-btn" onclick="prevQuestion()" class="px-5 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors flex items-center gap-2 text-sm disabled:opacity-30 disabled:pointer-events-none">
+                    <i class="fa-solid fa-arrow-right"></i> السابق
+                </button>
+                <button id="next-btn" onclick="nextQuestion()" class="px-6 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold hover:bg-brand-accent/90 transition-all duration-300 flex items-center gap-2 text-sm shadow-lg shadow-brand-accent/20">
+                    التالي <i class="fa-solid fa-arrow-left"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- واجهة لوحة معلومات البدء في حال لم يتم اختيار مادة -->
+        <div id="start-prompt" class="platinum-card text-center py-12 px-6 rounded-2xl border border-dashed border-slate-700">
+            <i class="fa-solid fa-compass-drafting text-5xl text-slate-600 mb-4 animate-pulse"></i>
+            <h4 class="text-lg font-bold text-slate-300 mb-2">جاهز لبدء مغامرة التعلم؟</h4>
+            <p class="text-slate-500 text-sm max-w-md mx-auto">
+                اضغط على إحدى المواد بالأعلى لتفعيل لوحة الاختبار والبدء بالتدرب الفوري وتلقي الملاحظات التشجيعية.
+            </p>
+        </div>
+
+        <!-- واجهة النتيجة والشهادة -->
+        <div id="result-container" class="hidden platinum-card rounded-2xl p-8 text-center shadow-2xl max-w-2xl mx-auto border-2 border-brand-accent/40 relative">
+            <div class="absolute inset-0 bg-brand-accent/5 pointer-events-none rounded-2xl"></div>
+            <i class="fa-solid fa-circle-check text-6xl text-brand-accent mb-4 animate-scale"></i>
+            <h2 class="text-3xl font-extrabold text-slate-100 mb-2">ممتاز يا بطل! 🌟</h2>
+            <p class="text-slate-400 text-sm mb-6">لقد أتممت بنجاح التدريب الخاص بالصف الثالث الابتدائي</p>
+            
+            <div class="bg-brand-dark/80 p-6 rounded-xl border border-slate-800 mb-6">
+                <span class="text-xs text-slate-400 block mb-1">الدرجة المستحقة</span>
+                <span id="score-text" class="text-4xl font-extrabold text-brand-accent">0/0</span>
+                <p id="evaluation-msg" class="text-sm mt-3 text-slate-300 font-semibold"></p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="resetQuiz()" class="px-6 py-3 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 font-semibold transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> المحاولة مرة أخرى
+                </button>
+                <button onclick="generateCertificate()" class="px-6 py-3 rounded-xl bg-brand-accent text-brand-dark hover:bg-brand-accent/90 font-bold transition-all shadow-lg shadow-brand-accent/20 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> الحصول على شهادة تفوق
+                </button>
+            </div>
+        </div>
+
+        <!-- منطقة الشهادة المصممة للطباعة المباشرة -->
+        <div id="certificate-print-area" class="hidden mt-12 platinum-card p-8 rounded-3xl border-4 border-double border-brand-accent/60 text-center relative max-w-3xl mx-auto shadow-2xl bg-gradient-to-b from-[#0b1329] to-[#070c1b]">
+            <!-- إطار فخم وزوايا مزخرفة -->
+            <div class="absolute top-4 left-4 text-brand-accent/20 text-4xl"><i class="fa-solid fa-certificate"></i></div>
+            <div class="absolute top-4 right-4 text-brand-accent/20 text-4xl"><i class="fa-solid fa-certificate"></i></div>
+            <div class="absolute bottom-4 left-4 text-brand-accent/20 text-4xl"><i class="fa-solid fa-certificate"></i></div>
+            <div class="absolute bottom-4 right-4 text-brand-accent/20 text-4xl"><i class="fa-solid fa-certificate"></i></div>
+
+            <div class="border-2 border-slate-800 p-6 rounded-2xl">
+                <!-- الترويسة -->
+                <div class="flex justify-between items-center mb-6">
+                    <div class="text-right">
+                        <p class="text-xs text-slate-400">وزارة التعليم</p>
+                        <p class="text-xs font-bold text-slate-300">إدارة التعليم بمحافظتكم</p>
+                        <p class="text-xs font-bold text-slate-300">المدرسة النموذجية السابعة</p>
+                    </div>
+                    <div class="text-brand-accent text-3xl">
+                        <i class="fa-solid fa-medal"></i>
                     </div>
                 </div>
 
-                <div class="questions-map">
-                    <h4>خريطة بنود الاختبار (30 فقرة)</h4>
-                    <div class="map-grid" id="map-buttons-grid"></div>
-                    <button class="btn-action" style="width:100%; margin-top: 25px; justify-content: center; background-color: var(--danger-color);" onclick="endQuizAndCompileResults()">إنهاء الاختبار وتصحيح الإجابات <i class="fa-solid fa-square-check"></i></button>
+                <h1 class="text-3xl font-extrabold text-slate-100 tracking-wide mb-4 silver-gradient">شـهـادة تـفـوق وتـمـيـز</h1>
+                <p class="text-slate-400 text-xs mb-8">تفتخر إدارة المدرسة النموذجية السابعة بمنح هذه الشهادة بكل فخر واعتزاز</p>
+
+                <p class="text-md text-slate-300 mb-6">
+                    إلى البطل المتميز بالصف الثالث الابتدائي الذي اجتاز بنجاح واقتدار كافة معايير وتدريبات منصة التقييم الذكي بتقدير ممتاز.
+                </p>
+
+                <div class="grid grid-cols-2 gap-8 mt-12 border-t border-slate-800 pt-6">
+                    <div>
+                        <p class="text-[10px] text-slate-500">رائدة الشؤون التعليمية</p>
+                        <p class="text-xs font-bold text-slate-300 mt-1">لجنة التقييم والتدريب</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-500">قائدة المدرسة</p>
+                        <p class="text-xs font-bold text-brand-accent mt-1">أ. سهام عبدالله الزهراني</p>
+                    </div>
                 </div>
             </div>
+            
+            <button onclick="window.print()" class="mt-6 px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700 transition-all text-xs font-bold">
+                <i class="fa-solid fa-print"></i> طباعة الشهادة الورقية
+            </button>
         </div>
 
-        <div id="feedback-result-container" style="display: none; margin-top: 35px;">
-            <div class="quiz-card" style="border: 2px solid var(--teal-green);">
-                <h3 style="color: var(--teal-green); margin-bottom: 10px;"><i class="fa-solid fa-square-poll-vertical"></i> التقرير الأكاديمي التفصيلي والتفنيد العلمي</h3>
-                <div id="score-summary-zone" style="font-size: 18px; font-weight: 800; color: var(--primary-dark); padding: 15px 0;"></div>
-                
-                <h4 style="margin: 20px 0 10px 0; color: var(--primary-blue);">تفاصيل تحليل الإجابات وتفنيد الأداء للـ 30 فقرة:</h4>
-                <div id="detailed-feedback-zone" style="max-height: 550px; overflow-y: auto; padding-right: 5px;"></div>
-                
-                <button class="btn-action btn-secondary" style="margin-top: 25px;" onclick="invokePortfolioPrinting()"><i class="fa-solid fa-print"></i> طباعة ملف الإنجاز الشامل وحفظه (PDF)</button>
-            </div>
-        </div>
-    </div>
+    </main>
 
-    <div id="portfolio-print-zone">
-        <h1 style="text-align: center; color: #06405c;">بيان مخرجات التعلم وملف الإنجاز الأكاديمي الرسمي</h1>
-        <h3 style="text-align: center; color: #0a7e74; margin-bottom: 35px;">مجمع الأمير سلطان الابتدائي - سجل رسمي لعام 2026م</h3>
-        <hr style="border: 2px solid #06405c;">
-        <div style="margin: 25px 0; font-size: 16px; line-height: 2.4;">
-            <p><strong>اسم المستفيد الكامل:</strong> <span id="print-name"></span></p>
-            <p><strong>المسار التعليمي المعياري المخصص:</strong> <span id="print-role"></span></p>
-            <p><strong>نوع المحاكاة المنفذة:</strong> <span id="print-topic"></span></p>
-            <p><strong>النتيجة المئوية ومستوى الإتقان:</strong> <span id="print-score"></span></p>
-            <p><strong>طابع وتوقيت الفحص التلقائي:</strong> <span id="print-date"></span></p>
+    <!-- الفوتر السفلي المعزز للهوية -->
+    <footer class="platinum-card border-t border-slate-800 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-xs text-slate-500">
+                جميع الحقوق محفوظة للمدرسة النموذجية السابعة © 2026م.
+            </p>
+            <p class="text-[10px] text-brand-accent/60 mt-1 font-semibold">
+                بإشراف وتوجيه من قائدة المدرسة أ. سهام عبدالله الزهراني
+            </p>
         </div>
-        <hr>
-        <h3 style="margin-top: 25px; color: #06405c;">تقرير تفنيد الأداء والتوجيه العلمي الصادر للـ 30 فقرة:</h3>
-        <div id="print-details" style="margin-top: 20px;"></div>
-    </div>
-
-    <footer>
-        <p>مجمع الأمير سلطان الابتدائي © 2026 - نظام محاكاة الاختبارات الوطنية والمعيارية الفعال والمفصّل</p>
     </footer>
 
+    <!-- منطق وتفاعلات المنصة المخصصة لخصائص الصف الثالث الابتدائي -->
     <script>
-        const NAFAS_ARABIC_30 = [
-            { q: "ما الوظيفة البلاغية والنقدية المستنتجة من الآية: 'وَلَا تَجْعَلْ يَدَكَ مَغْلُولَةً إِلَىٰ عُنُقِكَ وَلَا تَبْسُطْهَا كُلَّ الْبَسْطِ'؟", c: "الكناية عن ذم البخل والتبذير والدعوة للاعتدال الحصيف.", w: ["التوجيه بربط الأيدي عند حدوث الشدائد والأزمات.", "الأمر بإنفاق كافة الأموال دفعة واحدة للمحتاجين.", "الإشارة إلى فضل الفقر التام على الغنى."], r: "الآية الكريمة تنهى عن حدّي الإفراط والتفريط كطبيعة سلوكية واقتصادية." },
-            { q: "قال الشاعر: 'إذا رأيتَ نيوبَ الليثِ بارزةً ... فلا تظننَّ أن الليثَ يبتسمُ'. ما الاستنتاج الضمني الأدق من هذا البيت？", c: "الحذر الشديد من المظاهر الخادعة وعدم الاطمئنان للاستسلام الظاهري.", w: ["أن الأسود تبتسم عندما تبتهج.", "أن الابتسامة صفة بيولوجية مشتركة بين الكائنات.", "دعوة لدراسة الفك والأسنان للحيوانات المفترسة."], r: "البيت يدعو لنقد المظاهر وعدم الانخداع بالتبسم إذا كان من عدو متربص." },
-            { q: "ما الموقع الإعرابي الصحيح لكلمة 'متفوقينِ' في جملة: 'ظننتُ الطالبينِ متفوقينِ'？", c: "مفعول به ثانٍ منصوب وعلامة نصبه الياء لأنه مثنى.", w: ["صفة منصوبة بالياء تتبع ما قبلها.", "مفعول به أول منصوب بالفتحة المقدرة.", "حال منصوب وعلامة نصبه الياء لأنه مثنى."], r: "الفعل 'ظن' ينصب مفعولين أصلهما مبتدأ وخبر." },
-            { q: "أي العبارات التالية تدل على أسلوب المدح الصحيح نحويًا وبنائيًا？", c: "نعمَ الصديقُ الكتابُ نافعاً لفكرك.", w: ["يا ليتَ الصديقُ كتابٌ يفيدك.", "ما أجملَ الصديقُ الصادقُ في الوعد.", "بئسَ الصديقُ من يفشي سرك."], r: "أسلوب المدح يتكون من فعل المدح (نعم) والفاعل والمخصوص بالمدح." },
-            { q: "ما المعنى المتضمن للجملة التالية: 'أشرقت الشمس لكن المطرَ مستمرٌّ'؟", c: "الاستدراك لمنع الفهم الخاطئ بأن المطر توقف.", w: ["التعجب والدهشة من تقلبات الفصول.", "التوكيد على قوة حرارة الشمس.", "التحذير من الفيضانات المفاجئة."], r: "حرف 'لكن' يفيد الاستدراك لمنع توهم السامع لشيء مغاير للواقع." },
-            { q: "أي الكلمات التالية كُتبت فيها الهمزة المتوسطة بشكل صحيح بناءً على قاعدة أقوى الحركتين؟", c: "مُؤْمِن", w: ["مَؤْمِن", "مُئْمِن", "مُأْمِن"], r: "الهمزة ساكنة وما قبلها مضموم، والضمة أقوى من السكون لذا ترسم على واو." },
-            { q: "في جملة 'قرأتُ كتابينِ اثنينِ'، ما إعراب كلمة 'اثنينِ'؟", c: "نعت (صفة) منصوب وعلامة نصبه الياء لأنه ملحق بالمثنى.", w: ["مفعول به ثانٍ منصوب بالياء.", "توكيد لفظي مجرور بالكسرة.", "مضاف إليه مجرور بالياء لأنه مثنى."], r: "الأعداد 1 و 2 إذا تلت المعدود تعرب نعتاً وتطابقه في الإعراب." },
-            { q: "حدد التعبير المجازي (الاستعارة) من بين الجمل التالية:", c: "طارت الأخبارُ السارة في أرجاء مجمع الأمير سلطان.", w: ["قرأ الطلاب الأخبار في الصحيفة الرسمية.", "كتب المعلم تقريراً عن نواتج التعلم.", "ألقى مدير المدرسة كلمة ترحيبية بالضيوف."], r: "الأخبار لا تطير، فالعبارة استعارة مكنية حيث شبه الأخبار بطائر يطير." },
-            { q: "ما الفكرة المحورية التي تناقشها العبارة: 'الوقت كالسيف إن لم تقطعه قطعك'؟", c: "أهمية إدارة الوقت واستغلاله قبل فوات الأوان.", w: ["صناعة السيوف الحادة واستخداماتها.", "تفضيل المعارك التاريخية القديمة.", "تنظيم الحصص الدراسية للطلاب بالتساوي."], r: "المثل يضرب للحث على اغتنام الوقت والفرص في الأنشطة المفيدة." },
-            { q: "في نص يتحدث عن التلوث، وردت جملة 'أدى ذلك إلى تراجع الغطاء النباتي'. ما علاقة هذه الجملة بما قبلها؟", c: "نتيجة مترتبة على ما قبلها.", w: ["تعليل وتوضيح للأسباب.", "تفصيل بعد إجمال مبهم.", "تعارض وتناقض في الأفكار."], r: "العبارة توضح الأثر والنتيجة النهائية الناتجة عن ممارسات التلوث المذكورة سابقاً." }
-        ];
-
-        const NAFAS_MATH_30 = [
-            { q: "مضمار جري مستطيل طوله ضعف عرضه. إذا دار طالب دورة كاملة وقطع مسافة 600 متر، كم تبلغ مساحة المضمار بالـ م²؟", c: "20000", w: ["40000", "15000", "30000"], r: "المحيط = 2 × (الطول + العرض). 2 × (2س + س) = 600 -> 6س = 600 -> العرض = 100 والطول = 200. المساحة = 200 × 100 = 20000." },
-            { q: "إذا كان متوسط درجات 5 طلاب هو 85. وعند انضمام طالب سادس، أصبح المتوسط 87. كم درجة الطالب السادس؟", c: "97", w: ["90", "87", "95"], r: "مجموع الـ 5 = 425. مجموع الـ 6 = 522. درجة السادس = 522 - 425 = 97." },
-            { q: "خزان ماء مكعب الشكل طول ضلعه 2 متر. كم لترًا من الماء يتسع هذا الخزان إذا تم ملؤه بالكامل؟", c: "8000", w: ["2000", "4000", "1000"], r: "الحجم = 2 × 2 × 2 = 8 متر مكعب. والمتر المكعب يساوي 1000 لتر، إذن 8 × 1000 = 8000 لتر." },
-            { q: "إذا تم تخفيض سعر جهاز حاسب آلي بمجمع سلطان بنسبة 20%، ليصبح سعره الجديد 2400 ريال، فكم كان سعره الأصلي؟", c: "3000", w: ["2800", "2600", "3200"], r: "2400 تمثل 80% من السعر الأصلي. السعر الأصلي = (2400 × 100) ÷ 80 = 3000 ريال." },
-            { q: "ما هو القاسم المشترك الأكبر (الأعلى) للعددين 24 و 36؟", c: "12", w: ["6", "8", "18"], r: "عوامل 24 هي 1,2,3,4,6,8,12,24 وعوامل 36 أكبر قاسم مشترك بينهما هو 12." },
-            { q: "إذا انطلقت سيارة بسرعة ثابتة قدرها 90 كم/ساعة، فكم دقيقة تستغرق لقطع مسافة 45 كيلومتراً؟", c: "30", w: ["45", "20", "60"], r: "الزمن = المسافة ÷ السرعة = 45 ÷ 90 = 0.5 ساعة. ونصف الساعة يساوي 30 دقيقة." },
-            { q: "صندوق يحتوي على 5 كرات حمراء، 3 كرات زرقاء، و2 كرة خضراء. ما احتمال سحب كرة زرقاء عشوائياً؟", c: "3/10", w: ["1/2", "1/5", "3/5"], r: "العدد الإجمالي للكرات = 5+3+2 = 10. احتمال الزرقاء = عدد الكرات الزرقاء ÷ الإجمالي = 3/10." },
-            { q: "حل المعادلة التالية لإيجاد قيمة س: 3س + 7 = 22.", c: "5", w: ["4", "6", "7"], r: "3س = 22 - 7 -> 3س = 15 -> س = 15 ÷ 3 = 5." },
-            { q: "ما هي قيمة الزاوية الثالثة في مثلث إذا كانت قيمتا الزاويتين الأوائل هي 50 درجة و 70 درجة؟", c: "60", w: ["50", "70", "80"], r: "مجموع زوايا المثلث الداخلية دائماً 180 درجة. الزاوية = 180 - (50 + 70) = 60 درجة." },
-            { q: "إذا كان عمر أحمد الآن 3 أضعاف عمر ابنه، وبعد 10 سنوات يصبح مجموع عمريهما 60 سنة، كم عمر أحمد الآن؟", c: "30", w: ["35", "40", "25"], r: "س + 3س + 20 = 60 -> 4س = 40 -> س (الابن) = 10، إذن الأب أحمد = 3 × 10 = 30 سنة." }
-        ];
-
-        const NAFAS_SCIENCE_30 = [
-            { q: "عند زيادة الضغط الواقع على غاز محصور مع ثبات درجة حرارته، يقل حجمه للنصف. ما القانون المفسر لذلك؟", c: "قانون بويل للغازات", w: ["قانون شارل", "قانون غاي-لوساك", "قانون نيوتن الثالث"], r: "قانون بويل يثبت العلاقة العكسية بين حجم الغاز وضغطه عند ثبات الحرارة." },
-            { q: "لماذا يشعر الشخص بالحرارة سريعاً عند لمس ملعقة معدنية موضوعة بماء مغلي مقارنة بملعقة خشبية؟", c: "لأن المعادن تحتوي على إلكترونات حرة تجعلها موصلات ممتازة للحرارة.", w: ["لأن الخشب يمتص الحرارة ويخفيها.", "لأن المنعقة المعدنية تزن أكثر.", "لأن الماء المغلي يتفاعل كيميائياً مع المعادن."], r: "المعادن مواد جيدة التوصيل للحرارة والكهرباء نظراً لوفرة الإلكترونات الحرة وحركتها." },
-            { q: "أي التراكيب التالية توجد في الخلايا النباتية فقط ولا توجد في الخلايا الحيوانية؟", c: "البلاستيدات الخضراء والجدار الخلوي", w: ["النواة والغشاء البلازمي", "الميتوكوندريا والسيتوبلازم", "الريبوسومات والجسم المركزي"], r: "الجدار الخلوي والبلاستيدات الخضراء المسؤولة عن البناء الضوئي تميز الخلايا النباتية." },
-            { q: "ما هي الظاهرة الطبيعية التي تنتج بشكل مباشر عن دوران الأرض حول محورها كل 24 ساعة؟", c: "تعاقب الليل والنهار", w: ["تتابع الفصول الأربعة", "حدوث ظاهرة الكسوف", "حركة المد والجزر"], r: "دوران الأرض حول نفسها أمام الشمس ينتج عنه تعاقب الليل والنهار على نصفي الكرة الأرضية." },
-            { q: "أي العناصر الكيميائية التالية يعتبر غازاً نبيلاً (خاملاً) لا يتفاعل بسهولة في الظروف القياسية؟", c: "الهيليوم (He)", w: ["الأكسجين (O2)", "الهيدروجين (H2)", "الصوديوم (Na)"], r: "الغازات النبيلة مثل الهيليوم والنيون تتميز بامتلاء مداراتها الخارجية بالإلكترونات مما يجعلها مستقرة." },
-            { q: "ما نوع الرابطة الكيميائية الناشئة عن تشارك زوج أو أكثر من الإلكترونات بين ذرتين من اللافلزات؟", c: "رابطة تساهمية", w: ["رابطة أيونية", "رابطة هيدروجينية", "رابطة فلزية"], r: "الروابط التساهمية تنشأ من التشارك والمساهمة بالإلكترونات بين الذرات اللافلزية." },
-            { q: "ما وظيفة الميتوكوندريا الأساسية داخل الخلية الحية؟", c: "إنتاج وتحرير الطاقة للخلية (ATP)", w: ["صناعة البروتينات المختلفة", "حفظ وتخزين المادة الوراثية", "تعديل وتغليف المواد الكيميائية"], r: "الميتوكوندريا هي مصانع الطاقة للخلية حيث يتم فيها التنفس الخلوي لإنتاج غاز ATP." },
-            { q: "أي المجموعات الغذائية التالية تعتبر المصدر الرئيسي والأسرع للحصول على الطاقة في جسم الإنسان؟", c: "الكربوهيدرات", w: ["البروتينات", "الفيتامينات", "الدهون المشبعة"], r: "الكربوهيدرات تتفكك سريعاً إلى جلوكوز وهو الوقود المفضل والأسرع لإنتاج طاقة الخلايا." },
-            { q: "ما الاسم العلمي الذي يطلق على عملية تحول المادة من الحالة الصلبة إلى الغازية مباشرة دون المرور بالسائلة؟", c: "التسامي", w: ["التبخر", "الانصهار", "التكثف"], r: "التسامي هو تحول المادة من صلب إلى غاز مباشرة مثل تحول الجليد الجاف." },
-            { q: "أي الكواكب التالية يعتبر أقرب الكواكب إلى الشمس في مجموعتنا الشمسية؟", c: "عطارد", w: ["الزهرة", "المريخ", "الأرض"], r: "عطارد هو الكوكب الأول والأقرب لمركز المجموعة الشمسية يليه الزهرة ثم الأرض." }
-        ];
-
-        const PROFESSIONAL_EDU_30 = [
-            { q: "إذا كان معامل التمييز لأحد الأسئلة في اختبار تحصيلي هو (-0.15)، فما الإجراء الصحيح بحسب معايير القياس؟", c: "حذف السؤال تماماً من الاختبار لأنه يميز مقلوباً.", w: ["إبقاء السؤال كما هو دون تغيير.", "تعديل الصياغة اللفظية فقط للسؤال.", "زيادة الدرجة المخصصة للسؤال لتعويض الطلاب."], r: "التمييز السالب يعني أن الضعاف أجابوا بشكل صحيح والمتفوقين أخطأوا، وهو خلل كبير." },
-            { q: "طلب معلم تقديم أكبر عدد ممكن من الاستخدامات غير التقليدية لعلبة بلاستيكية. ما المهارة المستهدفة؟", c: "الطلاقة والمرونة والأصالة (التفكير الإبداعي والتباعدي).", w: ["التفكير التقاربي والذكاء المنطقي الرياضي الحاد.", "الحفظ والاستظهار السريع للمعلومات البيئية.", "مهارة الاستماع والإنصات السلبي لأوامر المعلم."], r: "إنتاج أفكار متعددة ومتنوعة وغير مألوفة يقع مباشرة تحت مظلة التفكير الإبداعي." },
-            { q: "أي النظريات التربوية تركز على أن التعلم يحدث نتيجة تعديل البنية المعرفية الداخلية وعمليتي التمثيل والمواءمة؟", c: "النظرية المعرفية البنائية (جان بياجيه)", w: ["النظرية السلوكية", "النظرية الاشتراطية الكلاسيكية", "النظرية الاجتماعية"], r: "بياجيه يرى التعلم كعملية تنظيم ذاتي ومواءمة المخططات المعرفية الحالية مع الخبرات الجديدة." },
-            { q: "عندما يضع المعلم معايير واضحة لتقويم أداء الطلاب في مشروع معين لضمان العدالة والموضوعية، فإنه يستخدم:", c: "قوائم رصد أو سلالم التقدير اللفظية (Rubrics)", w: ["الاختبارات التشخيصية القبلية", "أسلوب المقابلة الشخصية العفوية", "خرائط المفاهيم الذهنية"], r: "سلالم التقدير اللفظية توفر معايير أداء محددة تضمن الموضوعية التامة في رصد الدرجات المهنية." },
-            { q: "المصطلح التربوي الذي يصف قيام المعلم بملاحظة أدائه التعليمي وتعديله ذاتياً لتحسين نواتج التعلم هو:", c: "التأمل المهني الذاتي (Reflective Teaching)", w: ["الاستقصاء التعاوني الموجه", "التوجيه المدرسي الإرشادي", "التدريس المصغر التقني"], r: "التأمل المهني هو أداة رئيسية لتطوير المعلم من خلال نقد وتحليل ممارساته الصفية بانتظام." },
-            { q: "وفقاً لتصنيف بلوم للأهداف المعرفية، يقع هدف 'أن يكتشف الطالب الأخطاء العلمية في التقرير' تحت مستوى:", c: "التحليل", w: ["الفهم", "التطبيق", "التذكر"], r: "اكتشاف العلاقات والأخطاء والأجزاء يقع تحت مهارة التحليل والتفكيك." },
-            { q: "ما هو الإجراء الأول والأكثر كفاءة لمعالجة مشكلة سلوكية بسيطة من أحد الطلاب لأول مرة داخل الصف؟", c: "التجاهل التكتيكي العابر أو الإشارات غير اللفظية (اللمس البصري).", w: ["إرسال الطالب مباشرة إلى إدارة المدرسة.", "توبيخ الطالب بصوت مرتفع أمام زملائه.", "حرمان الطالب من درجات المشاركة للفصل بأكمله."], r: "تعديل السلوك يبدأ بالتلميحات البسيطة غير اللفظية لمنع تعطيل بيئة سير الحصة الدراسية الحالية." },
-            { q: "أي من أنواع التقويم التالية يهتم بالدرجة الأولى بتحديد نقاط القوة والضعف لعلاج الفجوات التعليمية أثناء العام الدراسي؟", c: "التقويم التكويني (البنائي)", w: ["التقويم الختامي (النهائي)", "التقويم القبلي (التمهيدي)", "التقويم المعياري الخارجي"], r: "التقويم التكويني يصاحب العملية التعليمية لمراقبة تقدم الطلاب وإعطاء تغذية راجعة مستمرة." },
-            { q: "أراد معلم مراعاة الذكاء البصري المكاني لطلابه داخل الحصة، أي الأنشطة التالية يعتبر الأنسب لهم؟", c: "استخدام خرائط المفاهيم والرسوم التوضيحية ومقاطع الفيديو.", w: ["إجراء مناظرات لغوية خطابية بين الطلاب.", "إعطاء مسائل حسابية معقدة تحتاج لخطوات منطقية.", "الطلب منهم القيام بتمثيل أدوار حركية مسرحية."], r: "أصحاب الذكاء البصري يتعلمون بفاعلية أكبر عبر الصور والأشكال والتمثيل المرئي للبيانات." },
-            { q: "وفقاً لتسلسل ماسلو للهرم الإنساني للااحتياجات، ما هي الحاجة الأساسية التي يجب إشباعها أولاً ليقبل الطالب على التعلم؟", c: "الحاجات الفسيولوجية (مثل الغذاء والأمان البدني).", w: ["حاجة تقدير الذات والافتخار.", "حاجة تحقيق الذات والابتكار الكلي.", "الحاجات الاجتماعية والانتماء للأصدقاء."], r: "ماسلو يرى أن الحاجات البيولوجية والفسيولوجية والأمان تشكل قاعدة الهرم ولا يمكن الانتقال للأعلى بدونها." },
-            { q: "أي الخيارات التالية يعبر عن مفهوم 'الصدق' في بناء الاختبارات التحصيلية؟", c: "أن يقيس الاختبار ما وُضع بالفعل لقياسه دون تأثر بعوامل أخرى.", w: ["أن يعطي الاختبار نفس النتائج إذا أُعيد تطبيقه.", "أن تكون صياغة الأسئلة سهلة لجميع مستويات الطلاب.", "أن يشمل الاختبار كافة صفحات الكتاب المدرسي بالتساوي."], r: "الصدق يعني دقة القياس للهدف المراد، بينما الثبات هو استقرار النتائج عند إعادة التطبيق الإحصائي." },
-            { q: "ما هو الهدف الجوهري من إعداد واستخدام 'جدول المواصفات' عند بناء الاختبارات الرسمية؟", c: "تحقيق التوازن والصدق المحتوي وتوزيع الأسئلة وفقاً للأوزان النسبية للدروس.", w: ["تسهيل عملية التصحيح الآلي للمعلمين بالكنترول.", "تحديد الوقت الزمني المناسب لإنهاء ورقة الامتحان.", "مساعدة إدارة المدرسة في رصد وتدقيق الغياب."], r: "جدول المواصفات هو مخطط يربط محتوى المادة بمستويات الأهداف المعرفية لضمان شمولية الاختبار للدروس." },
-            { q: "منهجية التدريس التي تقسم الطلاب إلى مجموعات صغيرة غير متجانسة لتحقيق هدف تعليمي مشترك تسمى:", c: "التعلم التعاوني (Cooperative Learning)", w: ["التدريس المباشر الإلقائي", "التعلم الفردي الذاتي", "العصف الذهني الحر"], r: "التعلم التعاوني يرتكز على دمج مستويات مختلفة من الطلاب للعمل معاً وتبادل الخبرات وحل المهام." },
-            { q: "إذا لاحظ المعلم أن طالباً متميزاً انخفض مستواه فجأة بشكل ملحوظ، ما الإجراء المهني الأول والسليم؟", c: "إحالة الطالب أو التنسيق مع الموجه الطلابي لدراسة حالته النفسية أو الأسرية.", w: ["توجيه عقاب بدني فوري لتقصيره الأخير.", "نقله إلى الفصل الأدنى دراسياً كعقوبة رادعة.", "تجاهل المشكلة واعتبارها كبوة مؤقتة ستزول تلقائياً."], r: "دراسة الفجوات المفاجئة تتطلب عملاً إرشادياً مهنياً لمعرفة الأسباب النفسية أو الاجتماعية المؤثرة." },
-            { q: "أي من استراتيجيات التدريس التالية تتمحور بالكامل حول الطالب وتعتمد على إعطائه معطيات للوصول إلى القاعدة العامة؟", c: "الاستقراء (Induction)", w: ["الاستنتاج القياسي", "المحاضرة والالقاء", "النمذجة والمحاكاة السلبية"], r: "الاستقراء يبدأ من الأمثلة والجزئيات للوصول إلى القوانين والقواعد العامة والتعميمات." },
-            { q: "وفقاً لنظرية النمو المعرفي لبياجيه، في أي مرحلة يبدأ الفرد بالقدرة على التفكير المجرد ووضع الفرضيات المنطقية؟", c: "مرحلة العمليات المجردة / الشكلية (من سن 11 فما فوق)", w: ["مرحلة ما قبل العمليات الإجرائية", "المرحلة الحس حركية can-الملموسة", "مرحلة العمليات المادية المحسوسة"], r: "التفكير المجرد والافتراضي وحل المشكلات الفلسفية المعقدة يتشكل تماماً في مرحلة العمليات الرسمية." },
-            { q: "الدافعية التي تنبع من رغبة الطالب الداخلية في التعلم حباً في المعرفة والشعور بالإنجاز تسمى بالدافعية:", c: "الداخلية (Intrinsic Motivation)", w: ["الخارجية (Extrinsic)", "المجتمعية البيئية", "الشرطية المؤقتة"], r: "الدافعية الداخلية هي المحرك الذاتي للفرد نحو التعلم دون انتظار مكافآت أو جوائز خارجية مادية." },
-            { q: "توفير وسيلة مساعدة مؤقتة للطلاب أثناء بناء المفهوم الجديد، ثم سحبها تدريجياً حتى يعتمدوا على أنفسهم يُعرف بـ:", c: "الدعم أو السقالات التعليمية (Scaffolding)", w: ["التعلّم الذاتي المستقل", "التعزيز الإيجابي المستمر", "التغذية الراجعة التفسيرية"], r: "السقالات التعليمية (مفهوم فيغوتسكي) تقدم دعماً مرحلياً للطالب لمساعدته في منطقة النمو الوشيك." },
-            { q: "أسلوب تدريسي يهدف لتوليد سيل من الأفكار الإبداعية من الطلاب دون نقد أو تقييم في المراحل الأولى يسمى:", c: "العصف الذهني (Brainstorming)", w: ["التدريس المصغر التقني", "حل المشكلات الرياضية", "المناقشة والحوار الموجه"], r: "العصف الذهني يمنع النقد في البداية لتوفير مناخ حر يساعد على تدفق كافة الأفكار والحلول الابتكارية." },
-            { q: "أي مما يلي يعتبر الميزة الجوهرية لاستخدام 'ملف الإنجاز' (Portfolio) كأداة تقويم بديل متطورة؟", c: "يوثق نمو وتطور أداء الطالب وأعماله التأملية على مدار فترة زمنية طويلة.", w: ["سهولة وسرعة رصد الدرجات إلكترونياً بالمقارنة بالاختبار.", "التركيز على قياس الحفظ والاستظهار المباشر للمعلومات.", "أنه لا يتطلب جهداً أو وقتاً من الطالب والمعلم برمتهم."], r: "البورتفوليو يقيس الأداء الواقعي التطوري ويوثق نتاجات التعلم التأملية للطالب والمهارات المكتسبة." },
-            { q: "ما المكون الأول الذي يجب صياغته بدقة عند التخطيط لبناء وتصميم الوحدة الدراسية التعليمية؟", c: "الأهداف التعليمية ونواتج التعلم المستهدفة (Learning Outcomes)", w: ["الوسائل التعليمية والتكنولوجية المصاحبة", "أساليب التقويم والاختبار النهائي للوحدة", "الأنشطة الصفية واللاصفية المقترحة للطلاب"], r: "التخطيط السليم يبدأ دائماً بتحديد الغايات والأهداف التي توجه اختيار المحتوى والوسائل والتقويم." },
-            { q: "قيام المعلم بتقديم مكافأة للطالب فور إجابته المتميزة يمثل تطبيقاً لأسلوب التعزيز المستمد من النظرية:", c: "السلوكية (Behaviorism)", w: ["المعرفية", "البنائية الاجتماعية", "الإنسانية الروحية"], r: "النظرية السلوكية (سكنر) تعتمد كلياً على ثنائية (المثير والاستجابة) والتعزيز الفوري لتثبيت السلوك الإيجابي." },
-            { q: "تعد الفروق الفردية بين الطلاب ظاهرة طبيعية، والواجب المهني على المعلم للتعامل معها بفاعلية وكفاءة هو:", c: "تنويع استراتيجيات التدريس والوسائل وأساليب التقويم لتناسب كافة المستويات.", w: ["التركيز التام على الطلاب المتفوقين لإبراز نجاح المدرسة.", "شرح الدرس بمستوى واحد ثابت ومطالبة الجميع بالاستيعاب الفوري.", "إعطاء الطلاب الضعاف درجات إضافية مجانية دون تقويم حقيقي."], r: "التدريس المتمايز ينطلق من الإيمان بالفروق الفردية ويوفر مسارات can-متعددة للتعلم لتلبية احتياجات الجميع." },
-            { q: "أي الكلمات التالية يعبر عن مفهوم 'التطوير المهني المستمر' للمعلمين؟", c: "الممارسات المهنية المخططة التي تهدف لتطوير كفايات المعلمين المعرفية والمهارية.", w: ["الإشراف التربوي الدائم والرقابة المستمرة.", "التقويم المؤسسي السنوي للمدرسة.", "الإدارة الصفية الذكية للمشاكل السلوكية."], r: "التطوير المهني المستمر يشمل البرامج والورش والمجتمعات المهنية لرفع كفاءة المعلمين لمواكبة التحديثات." },
-            { q: "إذا أراد المعلم استخدام أسلوب تدريسي ينمي مهارة البحث العلمي وصنع القرارات وجمع البيانات ميدانياً، فإنه يختار:", c: "التعلم القائم على المشاريع (Project-Based Learning)", w: ["الإلقاء والمحاضرة الصفية", "التعليم المبرمج الفردي", "الاستظهار التلقائي للمصطلحات"], r: "المشاريع تدمج مجالات عملية ومهارات بحثية تطلب من الطلاب استقصاء مشكلة حقيقية وتقديم منتج نهائي." },
-            { q: "أي مستويات الأهداف المعرفية التالية يمثل القدرة على إصدار حكم على قيمة المواد والأفكار وفق معايير محددة؟", c: "التقويم (Evaluation)", w: ["التحليل", "التركيب", "التطبيق"], r: "التقويم يقع في قمة تصنيف بلوم التقليدي المعرفي، ويعني القدرة على المحاكمة النقدية وإصدار الأحكام العلمية." },
-            { q: "مفهوم 'مجتمعات التعلم المهنية' (PLCs) داخل المدرسة يركز بالدرجة الأولى والأساسية على عقلية:", c: "التعاون بين المعلمين لمناقشة تحديات التدريس وتحسين مخرجات التعلم.", w: ["التنافس الفردي بين المعلمين للحصول على جوائز التميز الحصرية.", "مراقبة حضور وغياب الطاقم الإداري وتدقيق الأوراق الرسمية.", "توزيع النصاب التدريسي والحصص بالتساوي التام بين المعلمين."], r: "مجتمعات التعلم المهنية تهدف لتحويل المدارس إلى مؤسسات متعلمة يتبادل فيها المعلمون الخبرات لحل فجوات التعلم." },
-            { q: "أي الإجراءات التالية يحقق التواصل الإيجابي الفعال والمعتمد مع أولياء أمور الطلاب لإطلاعهم على مستويات أبنائهم؟", c: "إرسال تقارير دورية منظمة وعقد لقاءات مجدولة لمناقشة نواتج التعلم والخطط العلاجية.", w: ["الاتصال الدائم بأولياء الأمور في أوقات متأخرة عند ارتكاب أي مخالفة بسيطة.", "الامتناع عن التواصل معهم إلا في حالات الرسوب النهائي للطالب.", "نشر درجات الطلاب وعرضها علناً في لوحات الإعلانات العامة بالمدرسة."], r: "الشراكة الرسمية والمنظمة مع الأسرة تتطلب تقارير بنائية دورية وشفافة تدعم نمو مخرجات الطالب الأكاديمية." },
-            { q: "عندما يصمم المعلم نشاطاً يطلب فيه من الطلاب بناء نموذج مجسم لكوكب الأرض مستخدمين الصلصال، فإنه يستهدف:", c: "الذكاء الحركي والجسدي والمكاني.", w: ["الذكاء اللغوي والخطابي الشفهي.", "الذكاء الموسيقي والإيقاعي السمعي.", "الذكاء المنطقي الرياضي التجريدي البحت."], r: "استخدام الأيدي والتشكيل وتجسيم الأبعاد يخدم الذكاءين الحركي الجسدي والمكاني البصري للطلاب." },
-            { q: "أي مما يلي يصف الممارسات المهنية المعتمدة للمنسق والمسؤول عن لجان 'الأمن والسلامة المدرسية' داخل البيئة التعليمية؟", c: "إعداد خطط الإخلاء الدورية، فحص وسائل السلامة، ونشر ثقافة الوعي بالمخاطر.", w: ["رصد درجات اختبارات نافس وتدقيق مصفوفة التحصيل الدراسي.", "متابعة غياب وتأخر الطاقم الإداري والكادر التعليمي للمدرسة.", "شرح المناهج الدراسية وتقديم حصص التقوية للطلاب المتعثرين."], r: "منسق الأمن والسلامة يركز كلياً على توفير بيئة تعليمية آمنة وخالية من المخاطر عبر خطط وقائية وعملية معتمدة." }
-        ];
-
-        // مصفوفة أسئلة كفايات التوجيه والإرشاد الطلابي (30 سؤالاً تخصصياً)
-        const PROFESSIONAL_GUIDANCE_30 = [
-            { q: "أي من النظريات الإرشادية التالية تركز على أهمية البيئة المحيطة والتفاعل الاجتماعي في تشكيل سلوك الطالب؟", c: "النظرية السلوكية الاجتماعية (ألبرت باندورا)", w: ["النظرية التحليلية الكلاسيكية", "النظرية العقلانية الانفعالية", "النظرية الذاتية لكارل روجرز"], r: "تعتبر نظرية التعلم الاجتماعي لباندورا أن السلوك يُكتسب من خلال الملاحظة والتقليد والنمذجة في البيئة الاجتماعية." },
-            { q: "ما هي الأداة المعتمدة والأنسب التي يستخدمها الموجه الطلابي لجمع معلومات أولية وشاملة عن حالة الطالب التحصيلية والسلوكية منذ دخوله المدرسة؟", c: "السجل الشامل للطالب", w: ["الملاحظة العابرة السريعة", "الاستبانة المفتوحة الموجهة", "الاختبارات التحصيلية المقننة"], r: "السجل الشامل يعتبر الأداة الرسمية والمنظمة لتوثيق وتتبع مسار الطالب الأكاديمي، الصحي، والاجتماعي بصفة مستمرة." },
-            { q: "عند تعاملك كموجه طلابي مع حالة غياب متكرر لطالب دون عذر، ما هو الإجراء الإرشادي المهني الأول والسليم؟", c: "استدعاء الطالب وعقد جلسة إرشاد فردي لبحث الأسباب والظروف الكامنة خلف الغياب.", w: ["إرسال إنذار بالفصل الفوري لولي الأمر دون مناقشة.", "حسم درجات المواظبة مباشرة من النظام لإجباره على الحضور.", "تحويل ملف الطالب مباشرة إلى قائد المدرسة لاتخاذ العقوبة."], r: "الإرشاد الفردي هو الخطوة المهنية الأولى لفهم الأسباب والدوافع النفسية أو الأسرية قبل اتخاذ أي إجراءات إدارية." },
-            { q: "أي من المبادئ التالية يمثل الركيزة الأساسية لميثاق أخلاقيات التوجيه والإرشاد التي لا يجوز انتهاكها إلا في الحالات المهددة للحياة؟", c: "السرية التامة وحفظ الخصوصية المعلوماتية للطالب.", w: ["العلنية والوضوح أمام الزملاء والمعلمين.", "المرونة التامة وتجاهل القوانين المدرسية.", "المساواة الصارمة في وقت الجلسات الإرشادية لجميع الطلاب."], r: "السرية هي جوهر الثقة بين المرشد والمسترشد، ولا تُخترق إلا لحماية الطالب أو الآخرين من خطر حتمي." },
-            { q: "إذا ظهرت على أحد الطلاب علامات الانطواء المفاجئ وتراجع المستوى الدراسي، أي نوع من أنواع الإرشاد يعتبر الأنسب للبدء بالتدخل؟", c: "الإرشاد الفردي الوقائي والعلاجي", w: ["الإرشاد الجمعي التفاعلي", "الإرشاد المهني والتخصصي", "التوجيه الجماعي عبر الإذاعة المدرسية"], r: "الحالات الفردية الخاصة التي يطرأ عليها تغير سلوكي مفاجئ تتطلب إرشاداً فردياً لضمان الخصوصية والتشخيص الدقيق للظاهرة." },
-            { q: "ترتكز نظرية 'العلاج العقلاني الانفعالية' لألبرت إيليس على مبدأ أن الاضطرابات النفسية والسلوكية لدى الطلاب تنتج عن:", c: "الأفكار والمعتقدات غير العقلانية حول الأحداث.", w: ["العوامل الوراثية والجينية البحتة.", "الصدمات اللاشعورية في مرحلة الطفولة المبكرة.", "ضعف المهارات الحركية والجسدية."], r: "يفترض إيليس أن الأفكار والمعتقدات غير المنطقية والمشوهة تجاه المواقف هي السبب الرئيسي للاضطراب وليس الموقف نفسه." },
-            { q: "ما الخطوة الأولى المنظمة في تطبيق 'دراسة الحالة' لطالب يعاني من تدني شديد في التحصيل الدراسي؟", c: "تحديد وتعريف المشكلة وصياغة البيانات الأولية للحالة.", w: ["وضع الخطة العلاجية والاتفاق على المواعيد.", "تحويل الطالب إلى مركز رعاية تخصصي خارج المدرسة.", "مراجعة درجات الطالب السابقة قبل خمس سنوات بشكل عشوائي."], r: "يبدأ مسار دراسة الحالة علمياً بتحديد وتوصيف المشكلة بدقة لفرز البيانات وصنع الافتراضات التشخيصية." },
-            { q: "يهدف 'برنامج رفق' المدرسي المعتمد في مدارس المملكة بالدرجة الأولى إلى:", c: "الحد من ظاهرة العنف المدرسي بجميع أشكاله (الجسدي واللفظي والسيبراني).", w: ["تعليم مهارات الحاسب والبرمجة الحديثة.", "تطوير مستوى الياقة البدنية والرياضية للطلاب الكسالى.", "تنظيم الرحلات المدرسية والزيارات الخارجية للأندية."], r: "برنامج رفق الإرشادي يعزز الجوانب الوقائية والعلاجية لخفض ومواجهة العنف بجميع أشكاله وتكريس مبدأ التسامح." },
-            { q: "المرشد الطلابي الذي يستعين بمجموعة من الطلاب لديهم نفس المشكلة (مثل قلق الاختبارات) للمناقشة سوياً، يستخدم:", c: "الإرشاد الجمعي (Group Counseling)", w: ["التوجيه العام غير المباشر", "الإرشاد الفردي الخاص", "تعديل السلوك عبر العقاب التنفيري"], r: "الإرشاد الجمعي يتم بوجود مرشد ومجموعة مسترشدين يتشابهون في المشكلة لتسريع الدعم المتبادل وتخفيف التوتر." },
-            { q: "عند اكتشاف الموجه الطلابي لعلامات إيذاء جسدي أو إهمال واضح على الطالب، فإن واجبه الأخلاقي والنظامي يتطلب:", c: "الرفع الفوري لوحدة الحماية الأسرية عبر خط البلاغات المعتمد حفاظاً على سلامته.", w: ["تأجيل الموضوع لحين انتهاء العام الدراسي تفادياً للمشاكل.", "التشاجر مع ولي الأمر وجهاً لوجه بمجرد رؤيته في الشارع.", "تجاهل العلامات واعتبارها حادثاً منزلياً عادياً لا يستوجب التدخل."], r: "الموجه ملتزم بنظام حماية الطفل من الإيذاء، والتبليغ الفوري للجهات الرسمية واجب نظامي وأخلاقي صارم لحماية الأرواح." },
-            { q: "وفقاً للنظرية الإنسانية لكارل روجرز، فإن أهم عنصر لنجاح العلاقة الإرشادية هو:", c: "التقبل غير المشروط والتعاطف الحقيقي مع المسترشد.", w: ["تقديم النصائح الجاهزة والحلول المباشرة والسريعة.", "فرض العقوبات على المسترشد إذا خالف المواعيد المحددة.", "إشراك كافة معلمي المدرسة في الجلسات الإرشادية الخاصة."], r: "يرى روجرز أن التقبل الإيجابي غير المشروط والتعاطف الوجداني يخلق البيئة الآمنة التي تسمح للطالب بالنمو الذاتي." },
-            { q: "أي من الأساليب التالية يعتبر من الفنيات السلوكية الفعالة لتقليل التوتر وقلق الامتحانات لدى الطلاب؟", c: "الاسترخاء العضلي والتنفس العميق المنظم.", w: ["الإقصاء العقابي المستمر والتهديد بالرسوب.", "التعزيز السلبي التلقائي العابر دون ضوابط.", "زيادة ساعات الدراسة الليلة القسرية تحت الإشراف الإجباري."], r: "فنيات الاسترخاء تعتبر أدوات تدريبية متميزة لخفض الاستثارة الفسيولوجية المصاحبة لقلق الاختبارات." },
-            { q: "ما هو التعريف الإجرائي لـ 'الرعاية الإرشادية للطلاب الموهوبين' في المدرسة؟", c: "تقديم برامج إثرائية ورعاية نفسية واجتماعية تضمن استثمار قدراتهم الفائقة.", w: ["منحهم جوائز مالية مستمرة دون برامج تطويرية مدروسة.", "استبعادهم من الطابور الصباحي لتقليل الضوضاء والازدحام لديهم.", "عزلهم بالكامل عن مجتمع أصدقائهم العاديين بصفة دائمة."], r: "رعاية الموهوبين تشمل الجوانب المعرفية عبر الإثراء، والنفسية لتجنب مشكلات مثل الكمالية الزائدة أو الضغوط." },
-            { q: "عندما يعاني أحد الطلاب من صعوبة بالغة في القراءة والكتابة بالرغم من أن ذكائه طبيعي، فإن الموجه يوجهه كحالة:", c: "صعوبات تعلم نوعية تحتاج للتنسيق مع معلم غرف المصادر.", w: ["تأخر دراسي عام بسبب الكسل المطلق من جهته.", "تخلف عقلي بسيط يتطلب نقله لمدارس الرعاية الخاصة.", "مشكلة انحراف سلوكي ناتجة عن خلل أسري جسيم."], r: "صعوبات التعلم تختلف عن التأخر الدراسي العام؛ إذ تكون في مهارة محددة وتحتاج لدعم أخصائي صعوبات التعلم." },
-            { q: "البرنامج الإرشادي المصمم لمساعدة طلاب الصف الثالث المتوسط على اختيار مساراتهم الثانوية والمهنية يسمى:", c: "الإرشاد والتوجيه المهني والتعليمي.", w: ["الإرشاد العلاجي الفردي للمراهقين.", "التوجيه الوقائي من السلوكيات الخاطئة.", "الإرشاد الوقائي الصحي الشامل."], r: "التوجيه المهني يهدف لمساعدة الطالب على فهم قدراته وميوله ومواءمتها مع المسارات الأكاديمية والمهنية المتاحة." },
-            { q: "يعتمد مقياس 'سوسيومتري' (Sociometry) الذي يطبقه الموجه الطلابي بالدرجة الأولى على قياس:", c: "العلاقات الاجتماعية ومستوى القبول والرفض بين أفراد الصف الواحد.", w: ["معدل الذكاء اللغوي والرياضي المقنن للطلاب.", "القدرات العضلية والحركية والبدنية العامة.", "مستوى قلق الطلاب من الواجبات المنزلية المتراكمة."], r: "الاختبارات السوسيومترية تقيس البناء الاجتماعي للعملاء داخل الجماعة وتكشف الطلاب المنعزلين والمحبوبين." },
-            { q: "عند صياغة 'الخطة التشغيلية' للتوجيه الطلابي، ما الذي يجب استهدافه كأولوية قصوى؟", c: "الاحتياجات النفسية والاجتماعية والتعليمية الحقيقية لطلاب المدرسة بناءً على دراسة المسح القبلي.", w: ["الأنشطة الأسهل تنفيذاً للموجه بغض النظر عن فائدة الطلاب منها.", "رغبات المدارس المجاورة لمحاكاة فعالياتهم حرفياً وتفصيلياً.", "ميزانية الأنشطة الترفيهية فقط لضمان المتعة البصرية الفورية."], r: "التخطيط الفعال يرتكز على تحديد وتحليل الاحتياجات الفعلية لمجتمع المدرسة لضمان كفاءة البرامج والتدخلات." },
-            { q: "أي مما يلي يُعد مثالاً على التدخل الإرشادي الوقائي (الوقاية من المستوى الأول)؟", c: "تنفيذ حملات توعوية لجميع الطلاب حول مخاطر التدخين والمخدرات قبل حدوث المشكلة.", w: ["علاج الإدمان الفعلي لأحد الطلاب في مستشفى متخصص خارجي.", "إجراء جلسات إرشادية مكثفة مع طالب ضبط متلبساً بالتدخين بالحمامات.", "تحويل الطلاب المفصولين من المدرسة لجهات تأديبية خاصة بالحي."], r: "الوقاية الأولية تستهدف منع حدوث السلوكيات السلبية قبل نشوئها من خلال تعزيز الوعي العام لكافة الطلاب." },
-            { q: "إذا لاحظ الموجه وجود عداء حاد وشائعات متداولة إلكترونياً بين طالبتين أو طالبين، فإن هذه المشكلة تصنف تحت مظلة:", c: "التنمر السيبراني (الإلكتروني).", w: ["الصراعات الأكاديمية الصرفة حول الدرجات.", "الخلافات الفكرية العميقة والمنهجية العامة.", "صعوبات التواصل الحركي والجسدي اللفظي."], r: "استخدام الشبكات والتقنيات لإيذاء الأقران وتشويه السمعة يندرج تحت مفهوم التنمر الإلكتروني." },
-            { q: "المصطلح الإرشادي الذي يطلق على محاولة الفرد غير الواعية لخفض التوتر النفسي عبر إسناد عيوبه وأخطائه للآخرين هو:", c: "الإسقاط (Projection) كحيلة دفاعية نفسية.", w: ["التبرير العقلاني البنائي والمفهوم.", "التسامي الإيجابي بالسلوكيات المرفوضة.", "النكوص والتراجع لمراحل نمو قديمة جداً."], r: "الإسقاط حيلة دفاعية لا شعورية ينسب فيها الشخص دوافعه وعيوبه المرفوضة إلى أشخاص آخرين." },
-            { q: "عند حدوث أزمة عنيفة بالمدرسة (مثل وفاة مفاجئة لمعلم أو طالب)، الإجراء الإرشادي العاجل لمواجهة الصدمة هو:", c: "تقديم إرشاد الأزمات والتدخل السريع لتهدئة الطلاب وتقديم الدعم النفسي المكثف.", w: ["إعطاء إجازة إجبارية فورية لكافة الطلاب دون تواصل إرشادي.", "تجاهل الحدث تماماً والطلب من الجميع إكمال الحصص بصمت شديد.", "عرض المشاهد الحزينة بشكل دائم في الإذاعة المدرسية للتوعية بقصر الحياة."], r: "إرشاد الأزمات يتطلب استجابة سريعة وبناءة لتخفيف آثار الصدمة الحادة وحماية الصحة النفسية لمجتمع المدرسة." },
-            { q: "التعزيز السلبي في تعديل السلوك لطلاب المدارس يعني:", c: "سحب أو إزالة مثير منفر لزيادة وتكرار حدوث السلوك الإيجابي المرغوب.", w: ["تقديم مكافآت مادية ومعنوية فور ارتكاب سلوك خاطئ.", "توجيه عقاب بدني قاسٍ وجارح للطالب الكسول أمام أقرانه.", "حرمان الطالب من كل مقومات الحياة المدرسية كعقوبة مستمرة."], r: "التعزيز السلبي يقوي السلوك الإيجابي من خلال إزالة العقبة أو المثير المزعج للطالب فور حدوث السلوك المرغوب." },
-            { q: "أي من الجهات التالية تمثل الجهة المعتمدة لتحويل حالات الاضطرابات العقلية أو النفسية الحادة التي تخرج عن تخصص الموجه الطلابي؟", c: "وحدات الخدمة الإرشادية التابعة لوزارة التعليم أو العيادات النفسية المتخصصة.", w: ["الشرطة المحلية ومراكز التوقيف الإداري مباشرة.", "المؤسسات التجارية والترفيهية بالمنطقة لعدم الاختصاص.", "المدارس الأهلية المجاورة للتخلص العاجل من الحالة."], r: "حالات الاضطرابات الشديدة (كالذهان أو الاكتئاب الحاد والاضطرابات العقلية) تتطلب تدخلاً طبياً وتُحال للوحدات والعيادات الرسمية التخصصية." },
-            { q: "تُعد 'النمذجة' (Modeling) من الفنيات الفعالة في:", c: "إكساب الطلاب سلوكيات جديدة إيجابية عبر الملاحظة والتقليد لنموذج مثالي.", w: ["تفريغ الانفعالات والتوتر من خلال التمثيل واللعب العشوائي.", "حساب المعاملات الإحصائية لدرجات اختبارات القدرات العامة للطلاب.", "حفظ الدروس الصعبة عن طريق نسخها عشرين مرة بالدفتر المدرسي."], r: "النمذجة (التعلم بالملاحظة) تعتمد على مشاهدة نموذج بشري حقيقي أو رمزي يمارس السلوك الصحيح ليتعلمه الطالب." },
-            { q: "يعد 'العقد السلوكي' (Behavioral Contract) وثيقة رسمية مبسطة تهدف إلى:", c: "الاتفاق المكتوب بين الموجه والطالب على سلوكيات معينة مقابل مكافآت أو عواقب واضحة ومحددة.", w: ["شراء مستلزمات مكتبية وتكنولوجية خاصة بغرفة التوجيه والإرشاد.", "توثيق غياب الطلاب إلكترونياً بالتعاون مع الكادر الإداري للمدرسة.", "تسجيل الطالب في الدورات التدريبية الخارجية المدفوعة الأجر بالحي."], r: "العقد السلوكي أداة منظمة في تعديل السلوك تلتزم فيها الأطراف بالواجبات والتعزيزات المتفق عليها بوضوح." },
-            { q: "عند التعامل مع مشكلة 'التأخر الدراسي المفاجئ' لطالب في مرحلة المراهقة، يجب على الموجه استيعاب أن هذه مرحلة تتميز بـ:", c: "التغيرات الفسيولوجية والانفعالية السريعة والحاجة لإثبات الذات والاستقلالية.", w: ["الاستقرار النفسي والاجتماعي التام وعدم التأثر بالأقران على الإطلاق.", "التفكير الحسي المادي البسيط وعدم القدرة على إدراك المفاهيم المجردة كلياً.", "التبعية المطلقة وغير المشروطة لآراء الكبار دون إبداء أي اعتراض."], r: "تعتبر المراهقة فترة انتقالية حرجة تتطلب تفهماً للتغيرات الهرمونية والنفسية والاجتماعية التي تنعكس على مستوى الطالب التحصيلي." },
-            { q: "المرشد الطلابي الذي يستمع بتركيز شديد للطالب دون مقاطعة، ويظهر تفهمه لعمق مشكلته، يطبق مهارة الإرشاد الأساسية:", c: "الإصغاء النشط والتعاطف الوجداني (Active Listening).", w: ["التوجيه المباشر وإعطاء الأوامر الصارمة والسريعة.", "المواجهة الهجومية وتفنيد أكاذيب الطالب بالتفصيل الحاد.", "التشخيص الفوري وإطلاق الأحكام السريعة على شخصية المسترشد."], r: "الإصغاء النشط يمنح المسترشد شعوراً بالأمان والاهتمام والاحترام، مما يدفعه للحديث بشفافية تامة عن أزمته الكامنة." },
-            { q: "لتنمية 'السلوك التوكيدي' (Assertive Behavior) لدى طالب خجول يعاني من ضعف الثقة بالنفس، يدربه الموجه على:", c: "التعبير عن مشاعره وآرائه ومطالبة الآخرين بحقوقه بأدب ودون إيذاء أو عدوانية.", w: ["تجنب الحديث مع أي شخص في المدرسة والانعزال التام بالمنزل لراحة البال.", "الصراخ واستخدام القوة البدنية لانتزاع حقوقه بالقوة من زملائه الطلاب.", "الموافقة التامة على كل ما يطلبه الآخرون منه للتخلص من الإحراج الاجتماعي."], r: "توكيد الذات سلوك إيجابي وسط بين الخنوع والعدوانية، يساعد الطالب على التعبير عن ذاته وثقته بقدراته." },
-            { q: "أي من السجلات التالية يجب ألا يطلع عليه أي معلم أو كادر إداري بالمدرسة حفاظاً على أسرار الطلاب المهنية؟", c: "سجل الحالات الخاصة ودراسة الحالة الإرشادية.", w: ["سجل درجات الطلاب للفترات الدراسية المعتمدة.", "سجل حضور وغياب الطلاب اليومي بموقع المدرسة.", "سجل تسليم الكتب الدراسية والمستلزمات المعرفية."], r: "دراسة الحالة وسجل المقابلات الفردية يحتويان على معلومات خاصة وسرية وحساسة للغاية، وحفظها التام مسؤولية حصرية للموجه." },
-            { q: "أهم ركيزة يُبنى عليها التدخل الإرشادي الناجح لمواجهة ظاهرة 'الغياب الجماعي' للطلاب قبل الإجازات هي:", c: "التوعية المسبقة والشراكة الفعالة مع أولياء الأمور وتفعيل البرامج الجاذبة والأنشطة المدرسية.", w: ["إغلاق أبواب المدرسة بصفة كاملة ومنع خروج أي طالب طوال اليوم.", "حرمان الطلاب الغائبين من وجبات الإفطار والمقصف المدرسي كعقوبة.", "تجاهل الأمر والبدء بشرح دروس جديدة بدون الطلاب الحاضرين إطلاقاً."], r: "مواجهة الغياب الجماعي تتطلب شراكة أسرية فاعلة لخلق دافعية حقيقية وجعل البيئة المدرسية جاذبة ومشوقة للطلاب حتى اللحظات الأخيرة." }
-        ];
-
-        // مصفوفة أسئلة كفايات القيادة والإدارة المدرسية (30 سؤالاً تخصصياً)
-        const PROFESSIONAL_ADMIN_30 = [
-            { q: "ما هو النمط القيادي الذي يشرك فيه قائد المدرسة مجتمع المعلمين والاداريين في اتخاذ القرارات وصناعة الرؤية التطويرية للمدرسة؟", c: "القيادة الديمقراطية (التشاركية)", w: ["القيادة الأوتوقراطية (التسلطية)", "القيادة الترسلية (الفوضوية)", "القيادة البيروقراطية الحرفية"], r: "القيادة التشاركية تعتمد على تعزيز دور فريق العمل والمشورة لزيادة الدافعية وتحسين جودة القرار التعليمي." },
-            { q: "أي من الأدوات التالية تستخدمها إدارة المدرسة لتحليل البيئة الداخلية (نقاط القوة والضعف) والبيئة الخارجية (الفرص والتهديدات)؟", c: "مصفوفة التحليل الرباعي (SWOT Analysis)", w: ["بطاقة الأداء المتوازن الكمية", "جدول المواصفات الفني للاختبارات", "منحنى ديمينغ للجودة الشاملة PDCA"], r: "تحليل SWOT هو الأداة الإستراتيجية الأبرز لفحص البيئة المدرسية الداخلية والخارجية لبناء الخطط التشغيلية بدقة." },
-            { q: "ما هو الإجراء الإداري النظامي الأنسب الذي يتخذه مدير المدرسة عند ملاحظة قصور في أداء أحد المعلمين الجدد؟", c: "عقد اجتماع تدارسي وبناء خطة دعم ونمو مهني مخصصة بالتنسيق مع المشرف التربوي.", w: ["الرفع المباشر بطلب نقله تأديبياً خارج المدرسة.", "توجيه لفت نظر رسمي مكتوب وحسم من راتبه فوراً.", "تجاهل الأمر والاعتماد على تقويم نهاية العام فقط لتقييمه."], r: "أهداف القيادة المدرسية تركز على التطوير والنمو المهني أولاً، من خلال المتابعة ووضع الخطط العلاجية لرفع الكفاءة." },
-            { q: "عند حدوث أزمة أو كارثة طارئة بالمدرسة (مثل التماس كهربائي)، ما هو الإجراء الإداري العاجل الذي يشرف عليه القائد مباشرة؟", c: "تفعيل خطة الإخلاء الفورية المعتمدة بالتعاون مع لجنة الأمن والسلامة المدرسية إلى منطقة التجمع والاتصال بالجهات المعنية.", w: ["الاتصال بأولياء الأمور أولاً لأخذ الإذن بإخلاء الطلاب.", "توجيه المعلمين لمواصلة الحصص داخل الفصول لحين زوال الخطر.", "البدء بالتحقيق الفردي مع العمال لمعرفة المسبب قبل الإخلاء."], r: "حماية الأرواح وتفعيل خطط الطوارئ والإخلاء الفوري هي الأولوية القصوى لإدارة الأزمات المدرسية المعتمدة." },
-            { q: "ترتكز عملية 'التقويم الذاتي' للمدرسة والمطلوبة من هيئة تقويم التعليم والتدريب بالدرجة الأولى على:", c: "قياس وتحليل أداء المدرسة الداخلي بناءً على معايير وضوابط التميز المدرسي المعتمدة ومشاركة مجتمع المدرسة.", w: ["مقارنة نتائج المدرسة بمدارس الدول المجاورة فقط.", "حساب متوسط درجات غياب الطلاب والمعلمين وتوثيقها الكترونياً.", "تقييم أداء المعلمين بشكل سري من قِبل الإدارة وتدوين العقوبات."], r: "التقويم الذاتي عملية منظمة تقودها المدرسة للوقوف على جودة أدائها التعليمي والتنظيمي وتحسين مخرجاتها بشكل مستمر." },
-            { q: "القيادة التي تهتم بتحفيز التابعين وإلهامهم لإنجاز أهداف تتجاوز توقعاتهم المعتادة وتطوير قدراتهم الشخصية تُعرف بالقيادة:", c: "القيادة التحويلية (Transformational Leadership)", w: ["التبادلية (Transactional)", "البيروقراطية الصارمة", "الفوضوية السلبية"], r: "القيادة التحويلية تسعى للتأثير البناء وإحداث تغيير جوهري في سلوك وقيم التابعين ودعم الإبداع والتطوير." },
-            { q: "أي من الخيارات التالية يُعد الهدف الرئيسي للـ 'مجالس المدرسية ولجان التميز والعمل الجماعي' بالمؤسسة التعليمية؟", c: "إشراك المعلمين والإداريين في التخطيط، القيادة، وصناعة السياسات والقرارات المنظمة.", w: ["تقاسم الأعباء المالية والرواتب المدرسية بالتساوي الإجباري بين الجميع.", "تجنب الرقابة الخارجية لوزارة التعليم والاستقلال التام عن القوانين.", "توزيع المهام الصعبة والشاقة على المعلمين الجدد فقط كإجراء تدريبي."], r: "المجالس المدرسية تعزز العمل الجماعي الإستراتيجي وتضمن العدالة والشفافية وتكامل الرؤى لتطوير الأداء الأكاديمي." },
-            { q: "التقويم الذي يركز على رصد جودة المخرجات والتحقق النهائي من مستويات التحصيل الطلابي في نهاية الفصل الدراسي هو تقويم:", c: "ختامي (Summative)", w: ["بنائي (Formative)", "تشخيصي (Diagnostic)", "مرحلي مستمر"], r: "التقويم الختامي يقيس المخرجات ونسبة نجاح الطلاب ورصد الأداء النهائي لمعايير الجودة بشكل عام." },
-            { q: "ما هي الأداة التنظيمية الأساسية التي يعتمد عليها مدير المدرسة لتوزيع الحصص والريادة واللجان والمهام الإدارية؟", c: "الدليل التنظيمي للمدارس والتشكيلات المدرسية المعتمدة.", w: ["التوجيه الشخصي العفوي اليومي غير المسجل في محاضر.", "قوائم الترشيحات للمدارس الأهلية القريبة.", "رغبات المعلمين الفردية دون اعتبار لمصلحة الطلاب الأكاديمية."], r: "الدليل التنظيمي يوضح بدقة الصلاحيات والأدوار والهياكل التنظيمية لتوزيع العمل وفق قواعد حوكمة سليمة وضابطة." },
-            { q: "العملية الإدارية التي تعنى بتحديد الرؤية، والرسالة، والأهداف الإستراتيجية للمدرسة على المدى الطويل تسمى:", c: "التخطيط الإستراتيجي للمدرسة.", w: ["الرقابة والمتابعة الميدانية للطلاب.", "التوجيه المدرسي والاجتماعي الشامل.", "التنظيم والتوثيق والتحقق من الملفات."], r: "التخطيط الإستراتيجي يعنى بوضع الرؤية طويلة المدى للمؤسسة وتصميم السياسات العامة للوصول إليها بكفاءة." },
-            { q: "تُعد 'مجتمعات التعلم المهنية' (PLCs) ركيزة قيادية للتطوير، لأنها تسهم بالدرجة الأولى في:", c: "دعم التنمية المهنية التشاركية لمعالجة تحديات التدريس الحقيقية وتحسين نواتج التعلم.", w: ["تخفيض ساعات العمل اليومية الرسمية للمعلمين بالمدرسة.", "مراقبة وتسجيل حضور وغياب طاقم المعلمين الكترونياً بالدقيقة والدرجة.", "إعداد عروض تقديمية ترفيهية خالية من الفائدة العلمية الحقيقية."], r: "تعتبر مجتمعات التعلم المهنية بيئة تشاركية تفاعلية يبحث فيها المعلمون عن حلول للفجوات التعليمية وتطوير أدائهم الصفي." },
-            { q: "المنهج الإداري الذي يركز على التحسين المستمر للخدمات والعمليات والمنتجات التعليمية بمشاركة الجميع يسمى:", c: "إدارة الجودة الشاملة (TQM)", w: ["القيادة الموقفية العفوية", "التفويض الإداري الكلي الفوضوي", "الإدارة بالأهداف الكمية البسيطة"], r: "الجودة الشاملة منهج إداري يعتمد على رضا المستفيد والتحسين المستمر في بيئة المدرسة بمساهمة كافة العاملين." },
-            { q: "عند ورود شكوى رسمية من ولي أمر طالب ضد أحد منسوبي المدرسة، ما هو الإجراء الإداري والنظامي الأول والسليم؟", c: "تشكيل لجنة تقصي حقائق برئاسة المدير أو الوكيل للتحقق من الواقعة بمهنية تامة وصمت وهدوء.", w: ["الرفع المباشر بفصل المنسوب فوراً دون سماع دفاعه أو التحقيق معه.", "تجاهل الشكوى كلياً واعتراض ولي الأمر بالقول وتوجيه اللوم القاسي له.", "نشر تفاصيل القضية والشكوى عبر حساب المدرسة في وسائل التواصل الاجتماعي."], r: "إدارة المشكلات والشكاوى تتطلب التحري والتحقيق الموضوعي لحفظ الحقوق وكرامة المنسوبين والطلاب معاً." },
-            { q: "وفقاً للوائح السلوك والمواظبة، الإجراء المناسب للتعامل مع غياب الطالب المتكرر يقع تحت مسؤولية لجنة:", c: "التوجيه والإرشاد والتحصيل الدراسي بالمدرسة.", w: ["الأمن والسلامة والصيانة الوقائية الدورية.", "النشاط الطلابي والفعاليات والرحلات الترفيهية.", "لجنة المقصف المدرسي والتغذية المعتمدة للطلاب."], r: "تتابع لجنة التوجيه والإرشاد غياب ومواظبة وسلوك الطلاب وتضع الخطط الوقائية والعلاجية للحد من الهدر الدراسي." },
-            { q: "تعتمد صياغة 'الخطة التشغيلية للمدرسة' بشكل مباشر على مواءمتها مع:", c: "أهداف ومؤشرات إدارة التعليم والوزارة وتطلعات رؤية المملكة العربية السعودية 2030.", w: ["الخطط التشغيلية للمدارس الدولية والمراكز التجارية بالمنطقة.", "البرامج الترفيهية للأندية الرياضية المحلية غير التعليمية.", "رغبات منسوبي المدرسة الفردية والشخصية البسيطة."], r: "الخطة التشغيلية لابد أن تلتزم وتتوائم وتنسجم مع الخطط الإستراتيجية العليا للوزارة لتحقيق الأهداف الوطنية الموحدة." },
-            { q: "النمط القيادي الذي يتكيف فيه القائد مع مستوى نضج وجاهزية المعلمين لتنفيذ المهام المختلفة يسمى بالقيادة:", c: "الموقفية (Situational Leadership)", w: ["الأوتوقراطية (التسلطية)", "التشاركية البسيطة", "البيروقراطية الصارمة"], r: "القيادة الموقفية تعتمد على المرونة وتغيير أسلوب القيادة (توجيه، تدريب، مساندة، تفويض) حسب نضج المعلم وقدرته." },
-            { q: "توفير 'التفويض الصلاحياتي' من قِبل قائد المدرسة للوكلاء ورؤساء الأقسام يهدف أساساً إلى:", c: "تمكين الصف الثاني من القيادات، وتخفيف الضغط على الإدارة العليا، وسرعة اتخاذ القرار.", w: ["التخلص التام من المسؤولية القانونية أمام الإشراف التربوي والوزارة.", "منح المنسوبين إجازات تعويضية مفتوحة وغير معتمدة نظاماً بالمدرسة.", "معاقبة الوكلاء بزيادة الأعباء اليومية عليهم بشكل شخصي عشوائي."], r: "التفويض الإداري الفعال يطور الكوادر القيادية الشابة ويسرع عجلة العمل ويمنح القائد فرصة للتركيز على الجوانب الإستراتيجية." },
-            { q: "أي من المعايير التالية يمثل الأولوية الأساسية عند تقييم أداء المعلم في تقرير الأداء الوظيفي السنوي؟", c: "مستوى تحصيل ونمو ونواتج تعلم طلابه والممارسات التدريسية والتطوير المهني الفعلي.", w: ["مظهر المعلم الخارجي وقدرته على الإلقاء الترفيهي العفوي البسيط فقط.", "عدد الهدايا التي يقدمها المعلم لإدارة المدرسة طوال العام الحالي.", "موافقته التامة وغير المشروطة على كافة الآراء الشخصية لمدير المدرسة."], r: "نواتج تعلم الطلاب والتميز التدريسي والتطور المهني هي معايير الجودة والمهنية الحقيقية للمعلم في المنظومة التعليمية." },
-            { q: "ما هو التعريف الفني والدقيق لـ 'المؤشرات' (Indicators) المستخدمة في الخطط التشغيلية لإدارة المدرسة؟", c: "مقاييس كمية أو نوعية تستخدم للتأكد من مدى تحقيق الأهداف والبرامج المخطط لها.", w: ["مخططات معمارية لفحص جودة المباني المدرسية وتصميم الفصول.", "تعليمات برمجية لتشغيل أجهزة الحاسب الآلي وتطوير الخوادم التكنولوجية.", "آراء المعلمين الشخصية في مستوى قائد المدرسة بعد انتهاء الأنشطة."], r: "المؤشرات توفر دليلاً علمياً وواقعياً قابلاً للقياس لتوضيح مدى النجاح في تحقيق الأهداف والبرامج التعليمية التشغيلية." },
-            { q: "عملية 'الشراكة المجتمعية' (ارتقاء) بالمدرسة تهدف بالدرجة الأولى والأساسية إلى:", c: "جسر الفجوة والتعاون التكاملي بين الأسرة والمدرسة والمجتمع لتحسين مخرجات وجودة مهارات الطلاب.", w: ["توفير مصادر تمويل مالي غير نظامي للمشاريع التجارية الخاصة بمجلس الإدارة.", "تدخل أولياء الأمور في القرارات الإدارية والترقيات والجزاءات لموظفي المدرسة.", "تجنب الرقابة من قِبل هيئة تقويم التعليم والوزارة وتدقيق الأوراق الرسمية."], r: "مبادرة ارتقاء للشراكة المجتمعية والاسرية تدعم التكامل التربوي لإثراء وتسهيل مخرجات الطلاب المعرفية والوجدانية." },
-            { q: "ما هو الأسلوب الأمثل لإدارة 'الصراعات' والخلافات المهنية بين بعض المعلمين داخل المدرسة؟", c: "استخدام أسلوب الحوار البناء، والتركيز على المصالح المشتركة والمستفيد الأخير (الطالب) وبناء تفاهم متبادل.", w: ["معاقبة الطرفين بالفصل الفوري دون التحقيق في ملابسات الصراع القائم.", "تجاهل المشكلة تماماً وترك المعلمين يحلون خلافاتهم بالقوة خارج المدرسة.", "التحيز التام لأحد الطرفين بسبب الصداقة الشخصية المسبقة مع مدير المدرسة."], r: "إدارة الصراع المهني بطرق ودية وعلمية ترتكز على إبقاء مصلحة العمل والطلاب فوق كل الخلافات الشخصية والتكاملية." },
-            { q: "أهم ركيزة لإعداد 'ميزانية المدرسة' التقديرية (الميزانية التشغيلية) هي التوزيع بناءً على:", c: "الأولويات التعليمية، والخطط التطويرية السنوية، والاحتياجات الحقيقية للفصول الدراسية والمختبرات.", w: ["رغبات قائد المدرسة في تزيين مكتبه الإداري الخاص بالدرجة الأولى.", "توزيع المبالغ المتاحة بالتساوي التام للبنود الترفيهية غير المفيدة فقط.", "تخزين المبالغ المالية وعدم صرفها مطلقاً لتوفير فائض مالي غير مستغل."], r: "بناء الميزانية لابد أن يخدم أهداف نواتج التعلم ويوجه بكفاءة لتجهيز الفصول والمختبرات والمشاريع الداعمة لأداء الطلاب." },
-            { q: "عند الرغبة في تعزيز 'ثقافة التطوير المهني الذاتي' بالمدرسة، الإجراء القيادي المعتمد والأكثر فاعلية هو:", c: "تبني بحوث الفعل، وتفعيل الأقران (الزيارات الصفية المتبادلة)، وعرض النماذج المتميزة في جلسات تشاركية.", w: ["إجبار المعلمين على حضور ورش عمل خارج تخصصهم بالتهديد والوعيد الصارم.", "الطلب من المعلمين تدوين التزام مكتوب بالاستيقاظ مبكراً فقط طوال العام الدراسي.", "استقدام مدربين أجانب للحديث بلغة لا يفهمها منسوبو المدرسة التعليمية."], r: "الزيارات المتبادلة، وبحوث الفعل، والمجتمعات المهنية هي الأساليب الأعمق لتأصيل ثقافة التعلم المستمر والنمو المهني." },
-            { q: "أي من الأدوار التالية يمثل الجانب الريادي الأبرز لقائد المدرسة في دعم التحصيل الأكاديمي للطلاب؟", c: "القيادة التعليمية (Instructional Leadership) التي تركز مباشرة على المناهج وجودة التدريس ونماذج الفهم.", w: ["القيادة البيروقراطية الصارمة التي تهتم فقط بالأوراق والمستندات الإدارية الصامتة.", "الإدارة التشغيلية الفوضوية التي تترك الميدان دون توجيه أو متابعة وتفنيد علمي.", "الاهتمام بالصيانة الخارجية للمبنى وتجاهل ما يدور داخل القاعات الصفية."], r: "القيادة التعليمية تضع جودة التدريس ونواتج التعلم والتحصيل الدراسي للطلاب على رأس الأولويات والاهتمامات اليومية للقيادة." },
-            { q: "يعد 'التقويم المؤسسي' الخارجي للمدرسة، والذي تقوم به فرق القياس المعتمدة، وسيلة لـ:", c: "الوقوف على مواطن القوة وتحسين فرص الأداء لضمان التميز المؤسسي بناءً على معايير الجودة الشاملة.", w: ["تصيد أخطاء المعلمين لتخفيض رواتبهم وحرمانهم من حقوقهم المهنية كعقوبة.", "تجهيز مبررات لإغلاق المبنى المدرسي كلياً ونقل الطلاب لمدارس أخرى بعيدة.", "الترويج الإعلاني مدفوع الأجر للمدرسة دون قياس موضوعي أو واقعي علمي."], r: "التقويم الخارجي يستهدف دعم الجودة والتحسين المستمر من خلال فحص موضوعي محايد يحقق معايير الاعتماد والتميز." },
-            { q: "أي مما يلي يُعد نموذجاً للتخطيط الإداري التشاركي الذكي عند إعداد 'الجدول المدرسي الحصي اليومي'؟", c: "إعداد الجدول بناءً على الأوزان النسبية للمواد، ومراعاة الفروق الفردية للمعلمين بذكاء دون المساس بحقوق الطلاب.", w: ["توزيع الجدول كعقوبات للمعلمين الذين يبدون آراء معارضة في الاجتماعات الرسمية.", "وضع الحصص الهامة في نهاية الدوام اليومي والرياضة في الصباح الباكر لجميع الفصول دون تخطيط.", "تفويض معلم واحد لكتابة الجدول بالطريقة التي تخدم مصلحته الفردية فقط دون تدقيق."], r: "الجدول المدرسي لابد أن يوازن بين المصلحة الأكاديمية الفضلى للطلاب ونواتج التعلم مع مرونة can-تناسب احتياجات المعلمين بقدر الإمكان." },
-            { q: "عند رصد انخفاض عام في نتائج اختبارات 'نافس' الوطنية للمدرسة، الإجراء الإداري العاجل الذي يتخذه القائد هو:", c: "عقد اجتماع طارئ لتحليل نواتج التعلم بالتعاون مع المعلمين والموجه، وبناء خطة علاجية عاجلة ومتابعتها.", w: ["توجيه اللوم والاتهام والتهديد بالخصم المباشر لكافة الطلاب بالمدرسة دون استثناء.", "طلب إعادة تصحيح أوراق اختبار نافس من الجهة المنفذة بالرغم من دقة الفحص الآلي.", "إلغاء الحصص الرياضية والترفيهية وتحويلها لحفظ النصوص النظرية الصعبة بالتلقين التام."], r: "القيادة الناجحة تعالج الفجوات من خلال التشخيص البناء، وتحليل النتائج، ومشاركة فريق العمل لبناء خطة علاجية ومتابعة كفاءتها." },
-            { q: "التعريف الصحيح لمبدأ 'المساءلة المهنية' (Accountability) في الإدارة المدرسية المتقدمة يعني:", c: "تحمل جميع الأفراد مسؤولية أعمالهم ونواتج تعلم الطلاب والالتزام بالشفافية والتقييم المستمر.", w: ["تتبع أخطاء منسوبي المدرسة ومعاقبتهم دون منحهم حق التوضيح والدفاع عن أنفسهم.", "الامتناع التام عن الرفع بالتقارير لمديريات التعليم تفادياً للمراجعة والتدقيق الخارجي.", "فرض قرارات فوقية صارمة ومفاجئة دون مناقشتها مع اللجان والمجالس المدرسية المعتمدة."], r: "المساءلة والشفافية تحققان كفاءة الأداء وجودة المخرجات من خلال تحمل كل فرد لأدواره ومسؤولياته بمهنية تامة." },
-            { q: "يُقصد بـ 'التواصل التنظيمي الصاعد' (Upward Communication) في الهياكل التنظيمية المدرسية انتقال التقارير والآراء من:", c: "المعلمين والإداريين والطلاب إلى قائد المدرسة والإدارة العليا للتعليم.", w: ["إدارة التعليم والوزارة مباشرة إلى المعلمين والوكلاء بالمدارس الفرعية.", "مدارس المحافظة المجاورة لمدارس المدينة لتسهيل نقل الملفات الخاصة.", "أولياء الأمور والمجتمع الخارجي للطلاب مباشرة دون المرور بالمدرسة."], r: "التواصل الصاعد يخدم رفع التقارير، والشكاوى، والاقتراحات، والتغذية الراجعة من الميدان والمنسوبين للقيادة المدرسية والتعليمية العليا." },
-            { q: "لتأهيل 'الصف الثاني من القادة' داخل مجمع الأمير سلطان الابتدائي، الإجراء الإداري الأكثر فاعلية ونظامية هو:", c: "تمكين الوكلاء ورؤساء اللجان، وإسناد قيادة بعض المشاريع لهم بشكل تدويري تحت التوجيه والدعم القيادي.", w: ["نقل الوكلاء لمدارس بعيدة وتعيين معلمين جدد ليس لديهم أي خبرة إدارية في إدارة المدرسة.", "الامتناع عن حضور أي اجتماعات وترك المدرسة دون إدارة لفترات طويلة كاختبار حاد لهم.", "إلزام الجميع بتقليد حركات وتصرفات القائد الشخصية دون النظر لكفاياتهم المهارية الكلية."], r: "صناعة القادة تتطلب تمكيناً، وتفويضاً، ودعماً مرحلياً (سقالات قيادية) يمنحهم الثقة الكافية والخبرات والممارسات الفعلية في بيئة مهنية آمنة وبناءة." }
-        ];
-
-        let currentUser = null;
-        let currentQuestions = [];
-        let currentQuestionIndex = 0;
-        let timerInterval = null;
-        let lastReport = {};
-        let skillsChartInstance = null;
-        let timelineChartInstance = null;
-
-        window.onload = function() {
-            const saved = localStorage.getItem('sultan_official_user_v2');
-            if(saved) {
-                currentUser = JSON.parse(saved);
-                authorizeUserEnvironment();
-            }
+        // مصفوفة الأسئلة المخصصة والمعدلة لتناسب الخصائص المعرفية لطلاب الصف الثالث
+        const questionsData = {
+            arabic: [
+                {
+                    question: "ما هي الكلمة التي تبدأ بـ (اللام الشمسية) في الجمل التالية؟",
+                    options: [
+                        "الْمَدْرَسَةُ جَمِيلَةٌ",
+                        "الرَّسُولُ قُدْوَتُنَا",
+                        "الْكِتَابُ مُفِيدٌ",
+                        "الْقَلَمُ جَدِيدٌ"
+                    ],
+                    correct: 1,
+                    explanation: "كلمة (الرسول) تبدأ بلام شمسية لأن الحرف الذي بعد (الـ) مشدد (الرّ) واللام لا تُنطق."
+                },
+                {
+                    question: "اختر الكلمة التي كُتبت بها التاء المربوطة (ـة / ة) بشكل صحيح:",
+                    options: [
+                        "حَقِيبَتْ",
+                        "حَقِيبَه",
+                        "حَقِيبَةٌ",
+                        "حَقِيبَتُ"
+                    ],
+                    correct: 2,
+                    explanation: "نكتب التاء المربوطة (ة) لأنها تنطق هاء عند الوقف (حقيبه) وتنطق تاء عند الحركة (حقيبةٌ)."
+                },
+                {
+                    question: "عندما ننادي صديقنا 'خالد'، نستخدم أسلوب النداء ونقول:",
+                    options: [
+                        "يا خالدُ ساعدني",
+                        "هل خالدُ هنا؟",
+                        "ما أجمل خالد!",
+                        "اكتب يا خالد"
+                    ],
+                    correct: 0,
+                    explanation: "نستخدم الأداة (يا) للمناداة، فنقول: (يا خالدُ)."
+                }
+            ],
+            math: [
+                {
+                    question: "قسّم المعلم 12 قلمًا على 3 طلاب بالتساوي. كم قلمًا يأخذ كل طالب؟",
+                    options: [
+                        "3 أقلام",
+                        "4 أقلام",
+                        "6 أقلام",
+                        "5 أقلام"
+                    ],
+                    correct: 1,
+                    explanation: "نقوم بعملية القسمة: 12 ÷ 3 = 4 أقلام لكل طالب."
+                },
+                {
+                    question: "ما هي القيمة المنزلية للرقم (5) في العدد: ( 582 )؟",
+                    options: [
+                        "5 آحاد",
+                        "50 عشرات",
+                        "500 مئات",
+                        "5000 ألوف"
+                    ],
+                    correct: 2,
+                    explanation: "الرقم 5 يقع في منزلة المئات، لذلك قيمته المنزلية هي خمسمئة (500)."
+                },
+                {
+                    question: "أي من الأشكال الهندسية التالية له 3 أضلاع و3 زوايا؟",
+                    options: [
+                        "المربع",
+                        "المستطيل",
+                        "المثلث",
+                        "الدائرة"
+                    ],
+                    correct: 2,
+                    explanation: "المثلث هو الشكل الهندسي المكون من ثلاثة أضلاع وثلاثة زوايا."
+                }
+            ],
+            science: [
+                {
+                    question: "تحتاج النباتات إلى ثلاثة أشياء أساسية لتصنع غذاءها بنفسها، فما هي؟",
+                    options: [
+                        "الماء والتربة الملونة والحجارة",
+                        "ضوء الشمس والماء وغاز ثاني أكسيد الكربون",
+                        "الظل والأوراق الميتة والسماد فقط",
+                        "الحشرات والرياح القوية والبرودة"
+                    ],
+                    correct: 1,
+                    explanation: "يستخدم النبات ضوء الشمس والماء وثاني أكسيد الكربون في عملية البناء الضوئي لإنتاج غذائه."
+                },
+                {
+                    question: "أي من الحيوانات التالية يُعتبر من الثدييات (التي تلد وترضع صغارها)؟",
+                    options: [
+                        "العصفور",
+                        "الدلفين",
+                        "السمكة الذهبية",
+                        "التمساح"
+                    ],
+                    correct: 1,
+                    explanation: "الدلفين يعيش في الماء لكنه ينتمي إلى الثدييات ويتمتع بالولادة وإرضاع صغاره."
+                },
+                {
+                    question: "ما هي الحالة التي يتحول فيها الماء السائل إلى بخار ماء غازي بفعل الحرارة؟",
+                    options: [
+                        "التجمد",
+                        "التكثف",
+                        "التبخر",
+                        "الانصهار"
+                    ],
+                    correct: 2,
+                    explanation: "يسمى تحول السائل إلى غاز بفعل التسخين والحرارة بـ (التبخر)."
+                }
+            ]
         };
 
-        function handleLogin() {
-            const name = document.getElementById('auth-name').value.trim();
-            const role = document.getElementById('auth-role').value;
-            if(!name || name.length < 5) { alert("يرجى إدخال اسمك الثلاثي بشكل رسمي للتوثيق."); return; }
-            currentUser = { name: name, role: role };
-            localStorage.setItem('sultan_official_user_v2', JSON.stringify(currentUser));
-            authorizeUserEnvironment();
-        }
+        let currentSubject = '';
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
 
-        function authorizeUserEnvironment() {
-            document.getElementById('page-auth').classList.remove('active-page');
-            document.getElementById('main-nav').style.display = 'flex';
-            
-            if (currentUser.role === "طالب") {
-                document.getElementById('welcome-msg').innerText = `الطالب: ${currentUser.name} [نافس]`;
-                document.getElementById('dashboard-title').innerText = "منصة قياس مخرجات اختبار نافس الوطني للطلاب";
-                document.getElementById('stat-label-count').innerText = "اختبارات نافس المنفذة";
-                document.getElementById('hub-welcome-title').innerText = "محاكي اختبار نافس الوطني الرسمي";
-                document.getElementById('hub-welcome-desc').innerText = "يحتوي الاختبار على 30 سؤالاً فريداً وحقيقياً بالكامل وموزعاً بالتساوي: 10 أسئلة لغة عربية ونقد، 10 رياضيات وحل مشكلات، 10 علوم واستقصاء تجريبي.";
-            } else if (currentUser.role === "معلم") {
-                document.getElementById('welcome-msg').innerText = `المعلم: ${currentUser.name} [الرخصة المهنية]`;
-                document.getElementById('dashboard-title').innerText = "بوابة رصد كفايات الرخصة المهنية للمعلمين";
-                document.getElementById('stat-label-count').innerText = "اختبارات الرخصة المنفذة";
-                document.getElementById('hub-welcome-title').innerText = "محاكي اختبار الرخصة المهنية التربوية العامة";
-                document.getElementById('hub-welcome-desc').innerText = "يحتوي هذا الاختبار المعياري على 30 سؤالاً فريداً ومستقلاً تماماً في القياس، التقويم، ونظريات التعلم، وإدارة الصف.";
-            } else if (currentUser.role === "موجه") {
-                document.getElementById('welcome-msg').innerText = `الموجه: ${currentUser.name} [الرخصة المهنية]`;
-                document.getElementById('dashboard-title').innerText = "بوابة رصد كفايات رخصة التوجيه الطلابي";
-                document.getElementById('stat-label-count').innerText = "اختبارات التوجيه الطلابي المنفذة";
-                document.getElementById('hub-welcome-title').innerText = "محاكي اختبار الرخصة المهنية للتوجيه الطلابي";
-                document.getElementById('hub-welcome-desc').innerText = "يحتوي هذا الاختبار التخصصي على 30 سؤالاً فريداً ومستقلاً تماماً في نظريات الإرشاد، أدوات جمع البيانات، فنيات تعديل السلوك، ومواثيق الأخلاقيات الإرشادية.";
-            } else if (currentUser.role === "إدارة") {
-                document.getElementById('welcome-msg').innerText = `القائد/الوكيل: ${currentUser.name} [الرخصة المهنية]`;
-                document.getElementById('dashboard-title').innerText = "بوابة رصد كفايات القيادة والإدارة المدرسية";
-                document.getElementById('stat-label-count').innerText = "اختبارات القيادة المدرسية المنفذة";
-                document.getElementById('hub-welcome-title').innerText = "محاكي اختبار الرخصة المهنية للقيادة والإدارة المدرسية";
-                document.getElementById('hub-welcome-desc').innerText = "يحتوي هذا الاختبار التخصصي على 30 سؤالاً فريداً ومستقلاً تماماً في معايير أنماط القيادة، التخطيط الإستراتيجي، جودة المخرجات، التعامل مع الأزمات، والتقويم الذاتي للمدارس.";
-            }
-            
-            switchPage('dashboard');
-        }
-
-        function logout() {
-            localStorage.removeItem('sultan_official_user_v2');
-            location.reload();
-        }
-
-        function switchPage(pageId) {
-            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
-            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active-page');
-            const targetLink = document.getElementById('nav-' + pageId);
-            if(targetLink) targetLink.classList.add('active');
-
-            if(pageId === 'dashboard') renderDashboardDataAndCharts();
-        }
-
-        function buildDynamicQuestionSet(role) {
-            let finalSet = [];
-            if(role === "طالب") {
-                NAFAS_ARABIC_30.forEach(q => {
-                    finalSet.push({ q: q.q, opts: [q.c, ...q.w].sort(() => Math.random() - 0.5), correctText: q.c, reason: q.r, type: "اللغة العربية", bClass: "badge-ar" });
-                });
-                NAFAS_MATH_30.forEach(q => {
-                    finalSet.push({ q: q.q, opts: [q.c, ...q.w].sort(() => Math.random() - 0.5), correctText: q.c, reason: q.r, type: "الرياضيات", bClass: "badge-math" });
-                });
-                NAFAS_SCIENCE_30.forEach(q => {
-                    finalSet.push({ q: q.q, opts: [q.c, ...q.w].sort(() => Math.random() - 0.5), correctText: q.c, reason: q.r, type: "العلوم العامة", bClass: "badge-sci" });
-                });
-            } else if(role === "معلم") {
-                PROFESSIONAL_EDU_30.forEach(q => {
-                    finalSet.push({ q: q.q, opts: [q.c, ...q.w].sort(() => Math.random() - 0.5), correctText: q.c, reason: q.r, type: "الكفايات التربوية العامة", bClass: "badge-edu" });
-                });
-            } else if(role === "موجه") {
-                PROFESSIONAL_GUIDANCE_30.forEach(q => {
-                    finalSet.push({ q: q.q, opts: [q.c, ...q.w].sort(() => Math.random() - 0.5), correctText: q.c, reason: q.r, type: "التوجيه والإرشاد الطلابي", bClass: "badge-guidance" });
-                });
-            } else if(role === "إدارة") {
-                PROFESSIONAL_ADMIN_30.forEach(q => {
-                    finalSet.push({ q: q.q, opts: [q.c, ...q.w].sort(() => Math.random() - 0.5), correctText: q.c, reason: q.r, type: "القيادة والإدارة المدرسية", bClass: "badge-admin" });
-                });
-            }
-            return finalSet;
-        }
-
-        function initiateSegregatedQuiz() {
-            currentQuestions = buildDynamicQuestionSet(currentUser.role);
+        // التبديل بين المواد
+        function switchSubject(subject) {
+            currentSubject = subject;
+            currentQuestions = questionsData[subject];
             currentQuestionIndex = 0;
+            userAnswers = {};
 
-            document.getElementById('setup-quiz-zone').style.display = 'none';
-            document.getElementById('active-quiz-container').style.display = 'block';
-            document.getElementById('feedback-result-container').style.display = 'none';
-            
-            let headTitle = "";
-            if (currentUser.role === "طالب") headTitle = "نموذج اختبار نافس الوطني (30 فقرة فريدة للطلاب)";
-            else if (currentUser.role === "معلم") headTitle = "نموذج كفايات المعايير التربوية للرخصة المهنية (30 بنداً فريداً)";
-            else if (currentUser.role === "موجه") headTitle = "نموذج كفايات التوجيه والإرشاد الطلابي للرخصة المهنية (30 بنداً فريداً)";
-            else if (currentUser.role === "إدارة") headTitle = "نموذج كفايات القيادة والإدارة المدرسية للرخصة المهنية (30 بنداً فريداً)";
-            
-            document.getElementById('quiz-header-title').innerText = headTitle;
-
-            renderQuestionCard();
-            syncSidebarMap();
-            refreshProgressBar();
-            triggerClockTimer(1800); 
-        }
-
-        function renderQuestionCard() {
-            const qObj = currentQuestions[currentQuestionIndex];
-            const badge = document.getElementById('subject-badge');
-            badge.innerText = qObj.type;
-            badge.className = `badge ${qObj.bClass}`;
-            
-            document.getElementById('current-question-title').innerText = qObj.q;
-            
-            const block = document.getElementById('options-block');
-            block.innerHTML = '';
-
-            if (qObj.pickedOption !== undefined) {
-                block.classList.add('locked');
-            } else {
-                block.classList.remove('locked');
-            }
-
-            qObj.opts.forEach(opt => {
-                let isSelected = qObj.pickedOption === opt ? 'selected' : '';
-                block.innerHTML += `
-                    <div class="option-box ${isSelected}" onclick="commitChoice('${opt}')">
-                        <i class="fa-regular ${isSelected ? 'fa-circle-check':'fa-circle'}"></i> ${opt}
-                    </div>
-                `;
+            // تحديث تصميم التبويبات الفعالة
+            document.querySelectorAll('.subject-btn').forEach(btn => {
+                btn.classList.remove('neon-border', 'bg-brand-dark', 'text-brand-accent');
+                btn.classList.add('bg-slate-900', 'border-slate-800', 'text-slate-400');
             });
 
-            const feedbackBlock = document.getElementById('instant-feedback-block');
-            if(qObj.pickedOption !== undefined) {
-                let isCorrect = qObj.pickedOption === qObj.correctText;
-                feedbackBlock.innerHTML = `
-                    <div class="instant-feedback ${isCorrect ? 'correct' : 'wrong'}">
-                        <strong>${isCorrect ? '💡 إجابة صحيحة متميزة!' : '❌ إجابة خاطئة (تم تسجيل خيارك)'}</strong><br>
-                        ${!isCorrect ? `<span>الإجابة النموذجية: <b>${qObj.correctText}</b></span><br>` : ''}
-                        <strong>التفنيد العلمي:</strong> ${qObj.reason}
-                    </div>
+            const activeBtn = document.getElementById(`btn-${subject}`);
+            activeBtn.classList.add('neon-border', 'bg-brand-dark', 'text-brand-accent');
+            activeBtn.classList.remove('bg-slate-900', 'border-slate-800', 'text-slate-400');
+
+            // إخفاء موجهات البداية وإظهار منطقة الأسئلة
+            document.getElementById('start-prompt').classList.add('hidden');
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('certificate-print-area').classList.add('hidden');
+            
+            const quizContainer = document.getElementById('quiz-container');
+            quizContainer.classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        // تحميل وتحميل الأسئلة الحالية
+        function loadQuestion() {
+            const questionBox = document.getElementById('question-box');
+            const optionsContainer = document.getElementById('options-container');
+            const counter = document.getElementById('question-counter');
+            const progressBar = document.getElementById('progress-bar');
+            const q = currentQuestions[currentQuestionIndex];
+
+            // تحديث العداد وشريط التقدم
+            counter.innerText = `السؤال ${currentQuestionIndex + 1} من أصل ${currentQuestions.length}`;
+            const percentage = ((currentQuestionIndex) / currentQuestions.length) * 100;
+            progressBar.style.width = `${percentage}%`;
+
+            // كتابة نص السؤال مع حركات بصرية مبسطة
+            questionBox.innerHTML = `<span class="text-brand-accent text-lg">س ${currentQuestionIndex + 1}:</span> ${q.question}`;
+
+            // توليد الخيارات التفاعلية
+            optionsContainer.innerHTML = '';
+            q.options.forEach((option, index) => {
+                const isSelected = userAnswers[currentQuestionIndex] === index;
+                const optionBtn = document.createElement('button');
+                optionBtn.className = `w-full text-right p-4 rounded-xl border font-semibold text-sm transition-all duration-200 flex items-center justify-between ${
+                    isSelected 
+                    ? 'bg-brand-dark border-brand-accent text-brand-accent shadow-lg shadow-brand-accent/10' 
+                    : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                }`;
+                optionBtn.innerHTML = `
+                    <span>${option}</span>
+                    <i class="fa-regular ${isSelected ? 'fa-circle-dot text-brand-accent' : 'fa-circle text-slate-600'} text-lg"></i>
                 `;
-            } else {
-                feedbackBlock.innerHTML = '';
-            }
-
-            document.querySelectorAll('.map-btn').forEach((btn, index) => {
-                btn.classList.remove('current');
-                if(index === currentQuestionIndex) btn.classList.add('current');
+                optionBtn.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionBtn);
             });
-        }
 
-        function commitChoice(optionText) {
-            if (currentQuestions[currentQuestionIndex].pickedOption !== undefined) {
-                return; 
+            // التحكم في تفعيل زر "السابق"
+            const prevBtn = document.getElementById('prev-btn');
+            if (currentQuestionIndex === 0) {
+                prevBtn.setAttribute('disabled', 'true');
+            } else {
+                prevBtn.removeAttribute('disabled');
             }
 
-            currentQuestions[currentQuestionIndex].pickedOption = optionText;
-            renderQuestionCard();
-            syncSidebarMap();
-            refreshProgressBar();
+            // تعديل زر التالي ليصبح "إنهاء الاختبار" في السؤال الأخير
+            const nextBtn = document.getElementById('next-btn');
+            if (currentQuestionIndex === currentQuestions.length - 1) {
+                nextBtn.innerHTML = `تسليم الاختبار <i class="fa-solid fa-square-check"></i>`;
+                nextBtn.className = "px-6 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition-all duration-300 flex items-center gap-2 text-sm shadow-lg shadow-emerald-500/20";
+            } else {
+                nextBtn.innerHTML = `التالي <i class="fa-solid fa-arrow-left"></i>`;
+                nextBtn.className = "px-6 py-2.5 rounded-xl bg-brand-accent text-brand-dark font-bold hover:bg-brand-accent/90 transition-all duration-300 flex items-center gap-2 text-sm shadow-lg shadow-brand-accent/20";
+            }
         }
 
-        function syncSidebarMap() {
-            const grid = document.getElementById('map-buttons-grid');
-            grid.innerHTML = '';
+        // تسجيل اختيار الطالب والتحول التلقائي السلس بعد الاختيار بفترة وجيزة لتسهيل الاستخدام
+        function selectOption(index) {
+            userAnswers[currentQuestionIndex] = index;
+            loadQuestion(); // لإعادة تحديث التلوين للخيارات
+        }
+
+        // الانتقال للسؤال التالي
+        function nextQuestion() {
+            if (userAnswers[currentQuestionIndex] === undefined) {
+                alert("لطفاً يا بطل، اختر إجابة أولاً لكي تنتقل للخطوة التالية!");
+                return;
+            }
+
+            if (currentQuestionIndex < currentQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // العودة للسؤال السابق
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        // عرض النتائج والتقييم المتلائم مع المرحلة الابتدائية
+        function showResults() {
+            let score = 0;
             currentQuestions.forEach((q, idx) => {
-                let stateClass = q.pickedOption !== undefined ? 'answered' : '';
-                if(idx === currentQuestionIndex) stateClass += ' current';
-                grid.innerHTML += `<div class="map-btn ${stateClass}" onclick="jumpTo(${idx})">${idx + 1}</div>`;
-            });
-        }
-
-        function jumpTo(idx) {
-            currentQuestionIndex = idx;
-            renderQuestionCard();
-        }
-
-        function stepQuestion(direction) {
-            let next = currentQuestionIndex + direction;
-            if(next >= 0 && next < currentQuestions.length) {
-                currentQuestionIndex = next;
-                renderQuestionCard();
-            }
-        }
-
-        function refreshProgressBar() {
-            let done = currentQuestions.filter(q => q.pickedOption !== undefined).length;
-            document.getElementById('quiz-progress-bar').style.width = Math.round((done / 30) * 100) + "%";
-        }
-
-        function triggerClockTimer(seconds) {
-            let rem = seconds;
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                let m = Math.floor(rem / 60);
-                let s = rem % 60;
-                document.getElementById('quiz-clock').innerText = `${m < 10 ? '0'+m:m}:${s < 10 ? '0'+s:s}`;
-                if(--rem < 0) {
-                    clearInterval(timerInterval);
-                    alert("انتهى وقت الفحص الزمني النظامي! جاري تصحيح الإجابات ورصد ناتج المحاولة فوراً.");
-                    endQuizAndCompileResults();
+                if (userAnswers[idx] === q.correct) {
+                    score++;
                 }
-            }, 1000);
-        }
-
-        function endQuizAndCompileResults() {
-            clearInterval(timerInterval);
-            let correctCount = 0;
-            const zone = document.getElementById('detailed-feedback-zone');
-            zone.innerHTML = '';
-
-            currentQuestions.forEach((q, idx) => {
-                let isCorrect = q.pickedOption === q.correctText;
-                if(isCorrect) correctCount++;
-
-                zone.innerHTML += `
-                    <div class="feedback-item ${isCorrect ? 'feedback-correct':'feedback-wrong'}">
-                        <span class="badge ${q.bClass}">${q.type}</span>
-                        <p><strong>س ${idx + 1}: ${q.q}</strong></p>
-                        <p style="margin-top:4px;">إجابتك المحفوظة: <span style="font-weight:700;">${q.pickedOption || 'لم يتم اختيار إجابة'}</span> ${isCorrect ? ' <i class="fa-solid fa-circle-check" style="color:var(--success-color)"></i>':' <i class="fa-solid fa-circle-xmark" style="color:var(--danger-color)"></i>'}</p>
-                        ${!isCorrect ? `<p>الإجابة النموذجية المعتمدة: <strong style="color:var(--success-color)">${q.correctText}</strong></p>`:''}
-                        <p style="font-size:13px; margin-top:6px; color:var(--primary-dark); background:rgba(0,0,0,0.02); padding:8px; border-radius:6px;"><i class="fa-solid fa-circle-info"></i> <strong>التفنيد والتوجيه العلمي لهيئة التقويم:</strong> ${q.reason}</p>
-                    </div>
-                `;
             });
 
-            let pct = Math.round((correctCount / 30) * 100);
-            let labelTitle = "";
-            if (currentUser.role === "طالب") labelTitle = "اختبار نافس الشامل للطلاب";
-            else if (currentUser.role === "معلم") labelTitle = "اختبار الرخصة المهنية التربوية";
-            else if (currentUser.role === "موجه") labelTitle = "اختبار رخصة التوجيه الطلابي";
-            else if (currentUser.role === "إدارة") labelTitle = "اختبار رخصة القيادة والإدارة المدرسية";
+            document.getElementById('quiz-container').classList.add('hidden');
+            const resultContainer = document.getElementById('result-container');
+            resultContainer.classList.remove('hidden');
 
-            document.getElementById('score-summary-zone').innerText = `مستوى التمكن العام: ${pct}% (تم حل ${correctCount} فقرة حلاً صحيحاً ومطابقاً للمعايير من أصل 30 سؤال)`;
-            
-            document.getElementById('active-quiz-container').style.display = 'none';
-            document.getElementById('feedback-result-container').style.display = 'block';
-            document.getElementById('setup-quiz-zone').style.display = 'block';
+            const scoreText = document.getElementById('score-text');
+            scoreText.innerText = `${score} / ${currentQuestions.length}`;
 
-            saveResultRecord(labelTitle, pct, `${correctCount}/30`);
+            const evalMsg = document.getElementById('evaluation-msg');
+            const ratio = score / currentQuestions.length;
 
-            lastReport = {
-                topic: labelTitle,
-                scoreStr: `${pct}% (${correctCount}/30)`,
-                dateStr: new Date().toLocaleString('ar-SA'),
-                feedbackHtml: zone.innerHTML
-            };
-        }
-
-        function saveResultRecord(topic, pct, scoreStr) {
-            let key = `sultan_official_history_v2_${currentUser.name}`;
-            let data = localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : [];
-            data.push({ topic: topic, date: new Date().toLocaleString('ar-SA'), pct: pct, scoreStr: scoreStr });
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-
-        function renderDashboardDataAndCharts() {
-            let key = `sultan_official_history_v2_${currentUser.name}`;
-            let history = localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : [];
-            
-            document.getElementById('stat-total-quizzes').innerText = history.length;
-            let avg = 0;
-            if(history.length > 0) {
-                avg = Math.round(history.reduce((sum, item) => sum + item.pct, 0) / history.length);
+            if (ratio === 1) {
+                evalMsg.innerHTML = `<span class="text-emerald-400">درجة كاملة متميزة! 🥇 أنت بطل حقيقي ومستقبلك مشرق كالنور.</span>`;
+            } else if (ratio >= 0.6) {
+                evalMsg.innerHTML = `<span class="text-blue-400">أداء رائع جداً ومبشر! ⭐ بقليل من التركيز ستحقق العلامة الكاملة المرة القادمة.</span>`;
+            } else {
+                evalMsg.innerHTML = `<span class="text-amber-400">محاولة طيبة يا بطل! 📚 أعد قراءة الدروس وحاول مرة أخرى لتتعلم وتتفوق.</span>`;
             }
-            document.getElementById('stat-avg-score').innerText = avg + "%";
-
-            const tbody = document.getElementById('history-table-body');
-            tbody.innerHTML = history.length === 0 ? `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding: 30px 0;">لا يوجد محاولات سابقة مسجلة في هذا المسار حالياً. توجه إلى بوابة الاختبارات لبناء مصفوفتك الأولى.</td></tr>` : '';
-            
-            let scoresArray = [];
-            let labelsArray = [];
-
-            [...history].reverse().forEach((item, index) => {
-                scoresArray.push(item.pct);
-                labelsArray.push(`المحاولة ${index + 1}`);
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${item.topic}</strong></td>
-                        <td>${item.date}</td>
-                        <td><span style="color:${item.pct >= 70 ? 'var(--success-color)':'var(--danger-color)'}; font-weight:bold;">${item.pct}%</span></td>
-                        <td>${item.scoreStr}</td>
-                        <td><button class="btn-action" style="padding:4px 12px; font-size:11px;" onclick="switchPage('quiz-hub')">مراجعة البنود</button></td>
-                    </tr>
-                `;
-            });
-
-            if(skillsChartInstance) skillsChartInstance.destroy();
-            if(timelineChartInstance) timelineChartInstance.destroy();
-
-            const ctxSkills = document.getElementById('skillsChart').getContext('2d');
-            skillsChartInstance = new Chart(ctxSkills, {
-                type: 'radar',
-                data: {
-                    labels: ['الاستدلال الاستقرائي', 'حل المشكلات المعقدة', 'التحليل والاستنتاج الأدبي', 'النقد والتقويم المتكامل', 'إدارة زمن الفحص والمعاينة'],
-                    datasets: [{
-                        label: 'مستواك المعياري (%)',
-                        data: history.length > 0 ? [avg, avg + 5, avg - 2, avg + 3, 85] : [0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                        borderColor: '#28a745',
-                        borderWidth: 2
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
-            timelineChartInstance = new Chart(ctxTimeline, {
-                type: 'line',
-                data: {
-                    labels: labelsArray.length > 0 ? labelsArray : ['بدء التسجيل للمسار'],
-                    datasets: [{
-                        label: 'مؤشر صعود الكفاءة التراكمي',
-                        data: scoresArray.length > 0 ? scoresArray : [0],
-                        borderColor: '#1d5cb4',
-                        backgroundColor: 'rgba(29, 92, 180, 0.04)',
-                        tension: 0.25,
-                        fill: true
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
         }
 
-        function invokePortfolioPrinting() {
-            if(!lastReport.topic) return;
-            document.getElementById('print-name').innerText = currentUser.name;
-            
-            let roleText = "";
-            if (currentUser.role === "طالب") roleText = "طالب / مستفيد من نماذج نافس الوطنية";
-            else if (currentUser.role === "معلم") roleText = "معلم / مرشح لاختبار كفايات الرخصة المهنية";
-            else if (currentUser.role === "موجه") roleText = "موجه طلابي / مرشح لاختبار كفايات التوجيه والإرشاد الطلابي";
-            else if (currentUser.role === "إدارة") roleText = "قائد مدرسة / وكيل مدرسة / مرشح لاختبار كفايات الإدارة المدرسية";
-            
-            document.getElementById('print-role').innerText = roleText;
-            document.getElementById('print-topic').innerText = lastReport.topic;
-            document.getElementById('print-score').innerText = lastReport.scoreStr;
-            document.getElementById('print-date').innerText = lastReport.dateStr;
-            document.getElementById('print-details').innerHTML = lastReport.feedbackHtml;
-            window.print();
+        // إعادة تشغيل التحدي والمحاولة مرة أخرى
+        function resetQuiz() {
+            userAnswers = {};
+            currentQuestionIndex = 0;
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('certificate-print-area').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // إنتاج شهادة التفوق التفاعلية باسم "المدرسة النموذجية السابعة" وبإشراف "أ. سهام عبدالله الزهراني"
+        function generateCertificate() {
+            const printArea = document.getElementById('certificate-print-area');
+            printArea.classList.remove('hidden');
+            // التمرير التلقائي لمكان الشهادة
+            printArea.scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
