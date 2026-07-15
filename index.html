@@ -1,32 +1,580 @@
-:root {
-    --primary-green: #006C35;
-    --dark-teal: #003B46;
-    --light-mint: #80C241;
-    --bg-light: #F7FAFC;
-    --text-dark: #2D3748;
-}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مجمع الأمير سلطان الابتدائي - نظام المحاكاة الوطني الرسمي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* تعريف الألوان الرسمية للهوية البصرية لوزارة التعليم */
+        :root {
+            --moe-green: #006C35;       /* الأخضر الأساسي للوزارة */
+            --moe-gold: #C29B38;        /* الذهبي الرسمي المساعد للوزارة */
+            --moe-dark-blue: #003B46;   /* الكحلي/الأزرق الداكن للنصوص الكبرى */
+            --moe-soft-green: #E6F3EC;  /* أخضر ناعم جداً للخلفيات الداخلية */
+            --light-bg: #F8FAFC;        /* الرمادي العاجي الفاتح لخلفية الصفحة */
+            --text-main: #1A202C;       /* لون النص الأساسي */
+            --text-muted: #718096;     /* لون النصوص الفرعية */
+            --pure-white: #ffffff;      /* الأبيض النقي للبطاقات */
+            --danger-red: #E53E3E;      /* الأحمر للتنبيهات */
+            --success-green: #38A169;   /* الأخضر لحالات النجاح */
+            --border-color: #E2E8F0;    /* لون الحدود الفاصلة */
+        }
 
-body {
-    font-family: 'Cairo', 'Tajawal', sans-serif;
-    background-color: var(--bg-light);
-    color: var(--text-dark);
-    direction: rtl; /* يدعم الواجهة العربية بالكامل */
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-.header-bar {
-    background-color: var(--primary-green);
-    color: #ffffff;
-    padding: 15px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 4px solid var(--light-mint);
-}
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-.card-kpi {
-    background: #ffffff;
-    border-radius: 8px;
-    border-right: 5px solid var(--primary-green); /* شريط جانبي بلون الهوية */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    padding: 20px;
-}
+        /* تخطيط الصفحة الرئيسي */
+        .app-container {
+            display: flex;
+            width: 100%;
+        }
+
+        /* 1. القائمة الجانبية (Sidebar) */
+        .sidebar {
+            width: 280px;
+            background-color: var(--moe-dark-blue);
+            color: var(--pure-white);
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar-brand {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .sidebar-brand .logo-placeholder {
+            width: 70px;
+            height: 70px;
+            background-color: var(--pure-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            border: 3px solid var(--moe-gold);
+            font-size: 28px;
+            color: var(--moe-green);
+        }
+
+        .sidebar-brand h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--pure-white);
+            line-height: 1.4;
+        }
+
+        .sidebar-brand p {
+            font-size: 11px;
+            color: var(--moe-gold);
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 10px;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.25s ease;
+        }
+
+        .sidebar-menu a i {
+            margin-left: 12px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .sidebar-menu li.active a, 
+        .sidebar-menu a:hover {
+            background-color: var(--moe-green);
+            color: var(--pure-white);
+            border-right: 4px solid var(--moe-gold);
+        }
+
+        .sidebar-menu a:hover i {
+            transform: scale(1.1);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 11px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 2. منطقة المحتوى الرئيسية */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        /* الشريط العلوي (Navbar) */
+        .navbar {
+            background-color: var(--pure-white);
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--moe-dark-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-title i {
+            color: var(--moe-green);
+        }
+
+        .navbar-user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            text-align: left;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--moe-dark-blue);
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: var(--moe-gold);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            background-color: var(--moe-soft-green);
+            border: 2px solid var(--moe-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--moe-green);
+            font-weight: bold;
+        }
+
+        /* 3. حاوية محتوى الصفحة الداخلي */
+        .content-body {
+            padding: 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        /* بطاقات الإحصائيات (KPI Cards) */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background-color: var(--pure-white);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-right: 5px solid var(--moe-green);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .kpi-card:nth-child(2) {
+            border-right-color: var(--moe-gold);
+        }
+
+        .kpi-card:nth-child(3) {
+            border-right-color: var(--moe-dark-blue);
+        }
+
+        .kpi-card-data h3 {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .kpi-card-data p {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--moe-dark-blue);
+        }
+
+        .kpi-icon-wrapper {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background-color: var(--moe-soft-green);
+            color: var(--moe-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .kpi-card:nth-child(2) .kpi-icon-wrapper {
+            background-color: #FFFDF5;
+            color: var(--moe-gold);
+        }
+
+        /* 4. التقسيم الثنائي */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .content-card {
+            background-color: var(--pure-white);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--light-bg);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--moe-dark-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title::before {
+            content: '';
+            display: inline-block;
+            width: 5px;
+            height: 18px;
+            background-color: var(--moe-gold);
+            border-radius: 2px;
+        }
+
+        .btn-primary {
+            background-color: var(--moe-green);
+            color: var(--pure-white);
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background-color: #004d25;
+        }
+
+        /* الجداول */
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+            font-size: 13px;
+        }
+
+        .custom-table th {
+            background-color: var(--moe-soft-green);
+            color: var(--moe-green);
+            padding: 12px 15px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .custom-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .custom-table tr:hover {
+            background-color: #F8FAFC;
+        }
+
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .badge-success {
+            background-color: #E6F4EA;
+            color: var(--success-green);
+        }
+
+        .badge-warning {
+            background-color: #FEF3C7;
+            color: #D97706;
+        }
+
+        /* تذييل الصفحة */
+        .moe-footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo-placeholder">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h2>وزارة التعليم</h2>
+                <p>مجمع الأمير سلطان الابتدائي</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="#"><i class="fa-solid fa-chart-line"></i>الرئيسية والإحصائيات</a></li>
+                <li><a href="#"><i class="fa-solid fa-user-graduate"></i>شؤون الطلاب</a></li>
+                <li><a href="#"><i class="fa-solid fa-chalkboard-teacher"></i>الهيئة التعليمية</a></li>
+                <li><a href="#"><i class="fa-solid fa-file-invoice-dollar"></i>التقارير المدرسية</a></li>
+                <li><a href="#"><i class="fa-solid fa-gear"></i>إعدادات المنصة</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                جميع الحقوق محفوظة © وزارة التعليم 2026
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="navbar">
+                <div class="navbar-title">
+                    <i class="fa-solid fa-building-columns"></i>
+                    <span>مجمع الأمير سلطان الابتدائي - لوحة الإشراف والمحاكاة</span>
+                </div>
+                <div class="navbar-user-profile">
+                    <div class="user-info">
+                        <div class="user-name">عبدالرحمن بن خالد</div>
+                        <div class="user-role">مدير المنظومة التعليمية</div>
+                    </div>
+                    <div class="user-avatar">
+                        مدير
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-body">
+                
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-card-data">
+                            <h3>نسبة حضور الطلاب اليوم</h3>
+                            <p>94.2 %</p>
+                        </div>
+                        <div class="kpi-icon-wrapper">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-card-data">
+                            <h3>المعلمين المتواجدين</h3>
+                            <p>42 معلم</p>
+                        </div>
+                        <div class="kpi-icon-wrapper">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-card-data">
+                            <h3>جلسات المحاكاة المنجزة</h3>
+                            <p>1,280 جلسة</p>
+                        </div>
+                        <div class="kpi-icon-wrapper" style="background-color: var(--moe-soft-green); color: var(--moe-green);">
+                            <i class="fa-solid fa-laptop-code"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">تتبع أداء ونشاط النماذج الوطنية (نافس)</h3>
+                            <button class="btn-primary"><i class="fa-solid fa-download"></i> تصدير التقرير</button>
+                        </div>
+                        
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>اسم المستخدم</th>
+                                    <th>الدور التعليمي</th>
+                                    <th>آخر نموذج محاكاة</th>
+                                    <th>مستوى الأداء</th>
+                                    <th>تاريخ التقديم</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>أحمد الغامدي</td>
+                                    <td>طالب</td>
+                                    <td>اختبار نافس للعلوم والرياضيات</td>
+                                    <td><span class="badge-status badge-success">ممتاز (92%)</span></td>
+                                    <td>14 يوليو 2026</td>
+                                </tr>
+                                <tr>
+                                    <td>خالد الشهري</td>
+                                    <td>معلم</td>
+                                    <td>اختبار كفايات الرخصة المهنية</td>
+                                    <td><span class="badge-status badge-success">متقدم (88%)</span></td>
+                                    <td>13 يوليو 2026</td>
+                                </tr>
+                                <tr>
+                                    <td>سارة القحطاني</td>
+                                    <td>موجه طلابي</td>
+                                    <td>اختبار كفايات التوجيه الطلابي</td>
+                                    <td><span class="badge-status badge-warning">متوسط (74%)</span></td>
+                                    <td>12 يوليو 2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">مستويات الحضور اليومي</h3>
+                        </div>
+                        <div style="height: 250px; position: relative;">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <footer class="moe-footer">
+                المملكة العربية السعودية • تطوير تقنية المعلومات بوزارة التعليم لعام 2026م.
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['حاضر', 'غائب بعذر', 'غائب بدون عذر'],
+                datasets: [{
+                    data: [94.2, 3.8, 2],
+                    backgroundColor: [
+                        '#006C35',  
+                        '#C29B38',  
+                        '#E53E3E'   
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                family: 'Cairo',
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
